@@ -1,0 +1,46 @@
+[project]
+name = "pydocai"
+version = "0.0.1"
+description = "Use AI agent to analyze if a method's documentation is correct and sufficient."
+authors = [
+    {name = "Ernest Vanmosuinck",email = "ernest.vanmo@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.11"
+package-mode = false
+dependencies = [
+    "gitpython (>=3.1.46,<4.0.0)",
+    "black (>=26.1.0,<27.0.0)",
+    "ruff (>=0.14.13,<0.15.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pydocai]
+ignore-init-method = false
+ignore-init-module = false
+ignore-magic = false
+ignore-semiprivate = false
+ignore-private = false
+ignore-property-decorators = false
+ignore-module = false
+ignore-nested-functions = false
+ignore-nested-classes = false
+ignore-setters = false
+ignore-overloaded-functions = false
+fail-under = 80
+exclude = ["setup.py", "docs", "build"]
+ext = []
+# possible values: sphinx (default), google
+style = "sphinx"
+# possible values: 0 (minimal output), 1 (-v), 2 (-vv)
+verbose = 0
+quiet = false
+color = true
+omit-covered-files = false
+# output file logation
+generate-badge = "."
+badge-format = "svg"
