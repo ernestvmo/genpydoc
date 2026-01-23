@@ -52,6 +52,12 @@ class Extract:
         return nodes
 
     @staticmethod
+    def _filter_empty_nodes(nodes: list[CovNode] | None):
+        if not nodes:
+            return None
+        return [node for node in nodes if node.covered]
+
+    @staticmethod
     def _filter_inner_nested(nodes: list[CovNode]) -> list[CovNode]:
         nested_cls = [n for n in nodes if n.is_nested_cls]
         inner_nested_nodes = [n for n in nodes if n.parent in nested_cls]
@@ -94,19 +100,23 @@ class Extract:
         return filenames
 
     def _get_coverage(self, filenames: list[str | Path]):
-        results = []
+        results = {}
+        covered_results = {}
         for filename in filenames:
             result = self._get_file_coverage(filename)
+            covered_result = self._filter_empty_nodes(result)
             if result:
-                results.append(result)
-        return results
+                results[filename] = result
+            if covered_result:
+                covered_results[filename] = result
+        return results, covered_results
 
     def _get_file_coverage(self, filename: str | Path) -> list[CovNode] | None:
         with open(filename) as f:
             source = f.read()
 
         parsed_tree = ast.parse(source)
-        visitor = visit.Visitor(filename, self.config)
+        visitor = visit.Visitor(filename, self.config, source)
         visitor.visit(parsed_tree)
 
         filtered_nodes = self._filter_nodes(visitor.nodes)

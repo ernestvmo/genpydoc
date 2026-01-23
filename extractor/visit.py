@@ -6,18 +6,25 @@ import attr
 
 from extractor.config import Config
 
+DocumentableFunc = ast.AsyncFunctionDef | ast.FunctionDef
+DocumentableFuncOrClass = DocumentableFunc | ast.ClassDef
+DocumentableNode = DocumentableFuncOrClass | ast.Module
+
 
 @attr.s(eq=False)
 class CovNode:
-    name: str = attr.ib()
-    path: str = attr.ib()
-    level: int = attr.ib()
-    lineno: int = attr.ib()
-    covered: bool = attr.ib()
-    node_type: str = attr.ib()
-    is_nested_func: bool = attr.ib()
-    is_nested_cls: bool = attr.ib()
-    parent: Self = attr.ib()
+    name: str = attr.field()
+    path: str = attr.field()
+    level: int = attr.field()
+    lineno: int = attr.field()
+    covered: bool = attr.field()
+    node_type: str = attr.field()
+    is_nested_func: bool = attr.field()
+    is_nested_cls: bool = attr.field()
+    parent: Self = attr.field()
+    file: str = attr.field()
+    docstring: str | None = attr.field(default=None)
+    code: str | None = attr.field(default=None)
 
 
 class Visitor(ast.NodeVisitor):
@@ -25,20 +32,31 @@ class Visitor(ast.NodeVisitor):
     NodeVisitor for a python file to find docstrings.
     """
 
-    def __init__(self, filename, config: Config):
+    def __init__(self, filename, config: Config, source: str):
         self.filename = filename
-        self.stack = []
-        self.nodes = []
         self.config = config
+        self.source: str = source
+        self.stack: list[CovNode] = []
+        self.nodes: list[CovNode] = []
 
     @staticmethod
-    def _has_doc(node):
+    def _has_doc(node: DocumentableNode) -> bool:
         return (
             ast.get_docstring(node) is not None
             and ast.get_docstring(node).strip() != ""
         )
 
-    def _visit_helper(self, node):
+    @staticmethod
+    def _get_sanitized_docstring(node: DocumentableNode):
+        return ast.get_docstring(node).strip()
+
+    # @staticmethod
+    def _get_sanitized_code(self, node: DocumentableNode):
+        return ast.get_source_segment(self.source, node)
+
+    def _visit_helper(self, node: DocumentableNode) -> None:
+        file = os.path.basename(self.filename)
+
         if not hasattr(node, "name"):
             node_name = os.path.basename(self.filename)
         else:
@@ -69,6 +87,11 @@ class Visitor(ast.NodeVisitor):
             is_nested_func=self._is_nested_func(parent, node_type),
             is_nested_cls=self._is_nested_cls(parent, node_type),
             parent=parent,
+            file=file,
+            docstring=(
+                self._get_sanitized_docstring(node) if self._has_doc(node) else None
+            ),
+            code=self._get_sanitized_code(node),
         )
 
         self.stack.append(cov_node)
@@ -79,7 +102,7 @@ class Visitor(ast.NodeVisitor):
         self.stack.pop()
 
     @staticmethod
-    def _is_nested_func(parent: CovNode, node_type: str) -> bool:
+    def _is_nested_func(parent: CovNode | None, node_type: str) -> bool:
         if parent is None:
             return False
         if parent.node_type == "FunctionDef" and node_type == "FunctionDef":
@@ -87,7 +110,7 @@ class Visitor(ast.NodeVisitor):
         return False
 
     @staticmethod
-    def _is_nested_cls(parent: CovNode, node_type: str) -> bool:
+    def _is_nested_cls(parent: CovNode | None, node_type: str) -> bool:
         if parent is None:
             return False
         if parent.node_type in ["ClassDef", "FunctionDef"] and node_type == "ClassDef":
@@ -95,7 +118,7 @@ class Visitor(ast.NodeVisitor):
         return False
 
     @staticmethod
-    def _is_private(node: CovNode) -> bool:
+    def _is_private(node: DocumentableFuncOrClass) -> bool:
         if node.name.endswith("__"):
             return False
         if not node.name.startswith("__"):
@@ -103,7 +126,7 @@ class Visitor(ast.NodeVisitor):
         return True
 
     @staticmethod
-    def _is_semiprivate(node: CovNode) -> bool:
+    def _is_semiprivate(node: DocumentableFuncOrClass) -> bool:
         if node.name.endswith("__"):
             return False
         if node.name.startswith("__"):
@@ -112,7 +135,7 @@ class Visitor(ast.NodeVisitor):
             return False
         return True
 
-    def _is_ignored_common(self, node: CovNode) -> bool:
+    def _is_ignored_common(self, node: DocumentableFuncOrClass) -> bool:
         is_private = self._is_private(node)
         is_semiprivate = self._is_semiprivate(node)
 
@@ -123,10 +146,10 @@ class Visitor(ast.NodeVisitor):
 
         return False
 
-    def _is_class_ignored(self, node):
+    def _is_class_ignored(self, node: DocumentableFuncOrClass) -> bool:
         return self._is_ignored_common(node)
 
-    def _is_func_ignored(self, node):
+    def _is_func_ignored(self, node: DocumentableFuncOrClass) -> bool:
         is_init = node.name == "__init__"
         is_magic = all(
             [
@@ -153,7 +176,7 @@ class Visitor(ast.NodeVisitor):
         return self._is_ignored_common(node)
 
     @staticmethod
-    def _has_property_decorators(node: CovNode) -> bool:
+    def _has_property_decorators(node: DocumentableFuncOrClass) -> bool:
         if not hasattr(node, "decorator_list"):
             return False
         else:
@@ -169,7 +192,7 @@ class Visitor(ast.NodeVisitor):
             return False
 
     @staticmethod
-    def _has_setters(node: CovNode) -> bool:
+    def _has_setters(node: DocumentableFuncOrClass) -> bool:
         if not hasattr(node, "decorator_list"):
             return False
         else:
@@ -180,7 +203,7 @@ class Visitor(ast.NodeVisitor):
             return False
 
     @staticmethod
-    def _has_overload(node: CovNode) -> bool:
+    def _has_overload(node: DocumentableFuncOrClass) -> bool:
         if not hasattr(node, "decorator_list"):
             return False
         else:
@@ -197,20 +220,20 @@ class Visitor(ast.NodeVisitor):
                     return True
             return False
 
-    def visit_Module(self, node: CovNode):
+    def visit_Module(self, node: DocumentableNode) -> None:
         self._visit_helper(node=node)
 
-    def visit_ClassDef(self, node):
+    def visit_ClassDef(self, node: DocumentableFuncOrClass) -> None:
         if self._is_class_ignored(node):
             return
         self._visit_helper(node=node)
 
-    def visit_FunctionDef(self, node):
-        # if self._is_func_ignored(node):
-        #     return
+    def visit_FunctionDef(self, node: DocumentableFuncOrClass) -> None:
+        if self._is_func_ignored(node):
+            return
         self._visit_helper(node)
 
-    def visit_AsyncFunctionDef(self, node):
-        #         if self._is_func_ignored(node):
-        #             return
+    def visit_AsyncFunctionDef(self, node: DocumentableFuncOrClass) -> None:
+        if self._is_func_ignored(node):
+            return
         self._visit_helper(node)
