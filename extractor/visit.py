@@ -4,7 +4,7 @@ from typing import Self
 
 import attr
 
-from extractor.config import Config
+from config.config import Config
 
 DocumentableFunc = ast.AsyncFunctionDef | ast.FunctionDef
 DocumentableFuncOrClass = DocumentableFunc | ast.ClassDef

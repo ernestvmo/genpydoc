@@ -3,11 +3,11 @@ import sys
 
 from git import Diff, Repo
 
-from analyzer.git_utils import process_git_diff
+from git_retriever.utils import process_git_diff
 from extractor.visit import CovNode
 
 
-class Analyzer:
+class GitRetriever:
     def __init__(
         self,
         root: str,
@@ -55,7 +55,6 @@ class Analyzer:
     def _extract_lines(self):
         lines_for_evaluation = {}
         for k in self._diffed_map.keys():
-            # for k in self.covered_nodes.keys():
             diff = self.repo.index.diff("HEAD", paths=k, create_patch=True)
             if len(diff) > 1:
                 raise ValueError
@@ -63,14 +62,13 @@ class Analyzer:
                 diff = diff[0]
 
             if self._diffed_map.get(k, "A") == "A":
-                lines_for_evaluation[k] = {"*"}
+                lines_for_evaluation[k] = self.nodes[k]
             else:
                 lines = self._match_lines_to_ast(k, self._process_diff(diff))
                 lines_for_evaluation[k] = lines
         return lines_for_evaluation
 
-    def _match_lines_to_ast(self, k: str, lines: set[int]) -> set[str]:
-        print(lines)
+    def _match_lines_to_ast(self, k: str, lines: set[int]) -> set[CovNode]:
         definitions = set()
         for line in lines:
             traversed_nodes: list[CovNode] = []
@@ -81,12 +79,26 @@ class Analyzer:
                     traversed_nodes.append(node)
             if len(traversed_nodes) > 0:
                 for n in traversed_nodes:
-                    definitions.add(n.name)
+                    definitions.add(n)
             else:
                 continue
 
         return definitions
 
-    def process(self):
-        definitions_diffed = self._extract_lines()
-        print(definitions_diffed)
+    def _analyze_covered_nodes(
+        self,
+        diffed_nodes: dict[str, set[CovNode]],
+    ) -> dict[str, set[CovNode]]:
+        """TEST"""
+        keys = list(diffed_nodes.keys())
+        for k in keys:
+            nodes = {node for node in diffed_nodes[k] if node.covered}
+            if not nodes:
+                del diffed_nodes[k]
+                continue
+            diffed_nodes[k] = nodes
+        return diffed_nodes
+
+    def extract_diff(self) -> dict[str, set[CovNode]]:
+        nodes_diffed = self._extract_lines()
+        return self._analyze_covered_nodes(nodes_diffed)

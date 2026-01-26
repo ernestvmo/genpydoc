@@ -6,7 +6,7 @@ from fnmatch import fnmatch
 from pathlib import Path
 
 
-from extractor.config import Config
+from config.config import Config
 from extractor.visit import CovNode
 from utils.utils import get_common_base
 from extractor import visit
@@ -16,10 +16,10 @@ class Extract:
     COMMON_EXCLUDE = [".tox", ".venv", "venv", ".git", ".hg"]
     VALID_EXTENSIONS = [".py", ".pyi"]
 
-    def __init__(self, paths):
+    def __init__(self, paths, config: Config | None = None):
         self.paths = paths
         self.extensions = set(".py")
-        self.config = Config()
+        self.config = config if config else Config()
         self.excluded = ()
         self.common_base = pathlib.Path("/")
         self.output_formatter = None
