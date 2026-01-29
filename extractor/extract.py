@@ -108,7 +108,7 @@ class Extract:
             if result:
                 results[filename] = result
             if covered_result:
-                covered_results[filename] = result
+                covered_results[filename] = covered_result
         return results, covered_results
 
     def _get_file_coverage(self, filename: str | Path) -> list[CovNode] | None:
