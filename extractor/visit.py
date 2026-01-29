@@ -50,9 +50,18 @@ class Visitor(ast.NodeVisitor):
     def _get_sanitized_docstring(node: DocumentableNode):
         return ast.get_docstring(node).strip()
 
-    # @staticmethod
-    def _get_sanitized_code(self, node: DocumentableNode):
-        return ast.get_source_segment(self.source, node)
+    @staticmethod
+    def _remove_docstring_from_source(code: str, docstring: str) -> str:
+        docstring = ['"""', *docstring.splitlines()]
+        return "\n".join(l for l in code.splitlines() if l.strip() not in docstring)
+
+    def _get_sanitized_code(self, node: DocumentableNode) -> str | None:
+        code = ast.get_source_segment(self.source, node)
+        if self._has_doc(node) and code:
+            code = self._remove_docstring_from_source(
+                code=code, docstring=self._get_sanitized_docstring(node)
+            )
+        return code
 
     def _visit_helper(self, node: DocumentableNode) -> None:
         file = os.path.basename(self.filename)
@@ -231,9 +240,9 @@ class Visitor(ast.NodeVisitor):
     def visit_FunctionDef(self, node: DocumentableFuncOrClass) -> None:
         if self._is_func_ignored(node):
             return
-        self._visit_helper(node)
+        self._visit_helper(node=node)
 
     def visit_AsyncFunctionDef(self, node: DocumentableFuncOrClass) -> None:
         if self._is_func_ignored(node):
             return
-        self._visit_helper(node)
+        self._visit_helper(node=node)
