@@ -102,6 +102,7 @@ def process_changes(changes: list[DiffChange]) -> set[int]:
 
 
 def process_git_diff(diff: Diff) -> set[int]:
+    """TEST"""
     return process_changes(parse_diff(diff.diff))
 
 

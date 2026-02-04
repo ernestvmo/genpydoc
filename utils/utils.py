@@ -59,7 +59,6 @@ def read_config_file(ctx: Context, _param: Parameter, value: str | None) -> str 
 
 
 def get_common_base(files: list[str]) -> str:
-    """TEST"""
     commonbase = Path(commonprefix(files))
     while not commonbase.exists():
         commonbase = commonbase.parent

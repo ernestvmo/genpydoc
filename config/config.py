@@ -1,16 +1,20 @@
 import os.path
 import tomllib
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 import attr
 import click
 from click import Context, Parameter
 
+class PostProcessingConfig:
+    cleanup: bool = attr.ib(default=True)
+    convert: bool = attr.ib(default=True)
 
 @attr.s
 class Config:
     VALID_STYLES = ("sphinx", "google")  # FIXME needed?
+    VALID_MODELS = ("openai", "ollama")
 
     docstring_style: str = attr.ib(default="sphinx")
     fail_under: float = attr.ib(default=80.0)
@@ -26,7 +30,13 @@ class Config:
     ignore_property_decorators: bool = attr.ib(default=False)
     ignore_overloaded_functions: bool = attr.ib(default=False)
     omit_covered_files: bool = attr.ib(default=False)
+    include_only_covered: bool = attr.ib(default=True)
     run_on_diff: bool = attr.ib(default=True)
+    use_llm_provider: Literal["openai", "ollama"] = attr.ib(
+        default="openai"
+    )  # TODO validate
+    use_model: str = attr.ib(default="gpt-5-nano")  # TODO validate
+    post_processing: PostProcessingConfig = attr.ib(default=PostProcessingConfig())
 
     @docstring_style.validator
     def _validate_style(self, _attribute, value):
@@ -68,7 +78,7 @@ def read_config_file(ctx: Context, _param: Parameter, value: str | None) -> str 
         if value is None:
             return None
 
-    config = None
+    # config = None
     if value.endswith(".toml"):
         try:
             config = parse_pyproject_toml(value)
