@@ -29,7 +29,7 @@ class Commenter:
         self.__init_client()
         self.parser = Parser(config=config)
 
-    def __init_client(self):
+    def __init_client(self) -> None:
         self._model = self.config.use_model
         if self.config.use_llm_provider == "openai":  # todo other api?
             if not OPENAI_API_KEY:
@@ -74,7 +74,7 @@ class Commenter:
         response = await self._client_api.responses.create(model=self._model, input=prompt)
         responses[node_name] = response.output_text
 
-    async def process_prompt(self, prompt: str, node_name: str, responses: dict[str, str]):
+    async def process_prompt(self, prompt: str, node_name: str, responses: dict[str, str]) -> None:
         if self.config.use_llm_provider == "openai":
             await self.openai_process(prompt, node_name, responses)
 
@@ -97,14 +97,14 @@ class Commenter:
         print(f"Generated comments concurrently in {end - start:.2f} seconds.")
         return responses
 
-    async def comment(self, nodes: list[CovNode]):
+    async def comment(self, nodes: list[CovNode]) -> dict[str, str]:
         not_ignored = [n for n in nodes if n.node_type in ["ClassDef", "FunctionDef", "AsyncFunctionDef"]]
         prompts = {node.name: self.build_prompt(node=node) for node in not_ignored}
         comments = await self.process_prompts(prompts=prompts)
         return comments
 
     def document(self, nodes: dict[str, list[CovNode]]) -> None:
-        for k in nodes:
-            print(f"Checking file: {k}.", end="\t")
-            docs = asyncio.run(self.comment(nodes[k]))
-            self.parser.process(Path(k), docs)
+        for file in nodes:
+            print(f"Checking file: {file}.", end="\t")
+            docs = asyncio.run(self.comment(nodes[file]))
+            self.parser.process(Path(file), docs)

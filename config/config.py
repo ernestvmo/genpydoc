@@ -40,7 +40,7 @@ class Config:
     post_processing: PostProcessingConfig = attr.ib(default=PostProcessingConfig())
 
     @docstring_style.validator
-    def _validate_style(self, _attribute, value):
+    def _validate_style(self, _attribute, value) -> None:
         if value not in self.VALID_STYLES:
             raise ValueError(
                 f"invalid docstring_style '{value}'.\nSelect one of the following: {', '.join(self.VALID_STYLES)}"

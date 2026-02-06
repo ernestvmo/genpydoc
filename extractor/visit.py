@@ -56,7 +56,7 @@ class Visitor(ast.NodeVisitor):
         source (str): Source of the visited ast tree.
     """
 
-    def __init__(self, filename, config: Config, source: str):
+    def __init__(self, filename: str, config: Config, source: str):
         self.filename = filename
         self.config = config
         self.source: str = source
@@ -69,7 +69,7 @@ class Visitor(ast.NodeVisitor):
         return ast.get_docstring(node) is not None and ast.get_docstring(node).strip() != ""
 
     @staticmethod
-    def _get_sanitized_docstring(node: DocumentableNode):
+    def _get_sanitized_docstring(node: DocumentableNode) -> str:
         """Returns a sanitized (stripped of whitespace) version of the docstring."""
         return ast.get_docstring(node).strip()
 

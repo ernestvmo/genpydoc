@@ -4,7 +4,7 @@ import pathlib
 import sys
 from fnmatch import fnmatch
 from pathlib import Path
-
+from typing import Iterator
 
 from config.config import Config
 from extractor.visit import CovNode
@@ -26,11 +26,11 @@ class Extract:
         self._add_common_exclude()
         self.skipped_file_count = 0
 
-    def _add_common_exclude(self):
+    def _add_common_exclude(self) -> None:
         for path in self.paths:
             self.excluded = self.excluded + tuple(os.path.join(path, i) for i in self.COMMON_EXCLUDE)
 
-    def _filter_files(self, files):
+    def _filter_files(self, files: list[str]) -> Iterator[str]:
         for file in files:
             has_valid_ext = any([file.endswith(ext) for ext in self.extensions])
             if not has_valid_ext:
@@ -48,7 +48,7 @@ class Extract:
         return nodes
 
     @staticmethod
-    def _filter_empty_nodes(nodes: list[CovNode] | None):
+    def _filter_empty_nodes(nodes: list[CovNode] | None) -> list[CovNode] | None:
         if not nodes:
             return None
         return [node for node in nodes if node.covered]
@@ -70,7 +70,7 @@ class Extract:
                 elif node.covered and not node.parent.covered:
                     setattr(node.parent, "covered", True)
 
-    def get_filenames_from_path(self):
+    def get_filenames_from_path(self) -> list[str]:
         filenames = []
         for path in self.paths:
             if os.path.isfile(path):
@@ -93,9 +93,9 @@ class Extract:
         self.common_base = get_common_base(filenames)
         return filenames
 
-    def _get_coverage(self, filenames: list[str | Path]):
-        results = {}
-        covered_results = {}
+    def _get_coverage(self, filenames: list[str | Path]) -> tuple[dict[str, list[CovNode]], dict[str, list[CovNode]]]:
+        results: dict[str, list[CovNode]] = {}
+        covered_results: dict[str, list[CovNode]] = {}
         for filename in filenames:
             result = self._get_file_coverage(filename)
             covered_result = self._filter_empty_nodes(result)
@@ -128,6 +128,6 @@ class Extract:
 
         return filtered_nodes
 
-    def get_coverage(self):
+    def get_coverage(self) -> tuple[dict[str, list[CovNode]], dict[str, list[CovNode]]]:
         filenames = self.get_filenames_from_path()
         return self._get_coverage(filenames)

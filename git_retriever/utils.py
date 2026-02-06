@@ -96,12 +96,10 @@ def process_changes(changes: list[DiffChange]) -> set[int]:
 
 
 def process_git_diff(diff: Diff) -> set[int]:
-    """TEST"""
     return process_changes(parse_diff(diff.diff))
 
 
 def get_change_type(diff: Diff) -> ChangeType:
-    print("diff", diff.a_path, diff.b_path)
     if diff.change_type:
         return ChangeType(diff.change_type)
     elif diff.a_path is None and diff.b_path is not None:
@@ -113,5 +111,4 @@ def get_change_type(diff: Diff) -> ChangeType:
     elif diff.a_path is not None and diff.b_path is not None and diff.a_path == diff.b_path:
         return ChangeType.MODIFIED
     else:
-        print(diff)
-        raise ValueError
+        raise ValueError(f"{diff} not handled.")

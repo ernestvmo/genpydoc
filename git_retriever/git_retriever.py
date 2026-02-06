@@ -25,10 +25,10 @@ class GitRetriever:
         if not self._diffed_map or all(k not in self.covered_nodes.keys() for k in self._diffed_map.keys()):
             self.__stop_early()
 
-    def __add_all(self):
+    def __add_all(self) -> None:
         self.repo.git.add(all=True)
 
-    def __build_diffed_map(self):
+    def __build_diffed_map(self) -> dict[str, str]:
         def _reverse_mapping(ct: str | None) -> str:
             mapping = {"D": "A", "A": "D"}
             if ct not in mapping:
@@ -39,16 +39,16 @@ class GitRetriever:
         return {os.path.join(self.root, c.a_path): _reverse_mapping(c.change_type) for c in d}
 
     @staticmethod
-    def __stop_early():
+    def __stop_early() -> None:
         """Ends the program early"""
         sys.exit()
 
     @staticmethod
-    def _process_diff(diff: Diff):
+    def _process_diff(diff: Diff) -> set[int]:
         return process_git_diff(diff)
 
-    def _extract_lines(self):
-        lines_for_evaluation = {}
+    def _extract_lines(self) -> dict[str, set[CovNode]]:
+        lines_for_evaluation: dict[str, set[CovNode]] = {}
         for k in self._diffed_map.keys():
             diff = self.repo.index.diff("HEAD", paths=k, create_patch=True)
             if len(diff) > 1:
@@ -80,11 +80,10 @@ class GitRetriever:
 
         return definitions
 
+    @staticmethod
     def _analyze_covered_nodes(
-        self,
         diffed_nodes: dict[str, set[CovNode]],
     ) -> dict[str, set[CovNode]]:
-        """TEST"""
         keys = list(diffed_nodes.keys())
         for k in keys:
             nodes = {node for node in diffed_nodes[k] if node.covered}
