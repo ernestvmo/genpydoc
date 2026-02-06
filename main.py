@@ -1,5 +1,4 @@
 import os
-from pprint import pprint
 
 from commenter.commenter import Commenter
 from config.config import Config

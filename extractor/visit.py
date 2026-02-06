@@ -66,10 +66,7 @@ class Visitor(ast.NodeVisitor):
     @staticmethod
     def _has_doc(node: DocumentableNode) -> bool:
         """Return whether the node has docstrings."""
-        return (
-            ast.get_docstring(node) is not None
-            and ast.get_docstring(node).strip() != ""
-        )
+        return ast.get_docstring(node) is not None and ast.get_docstring(node).strip() != ""
 
     @staticmethod
     def _get_sanitized_docstring(node: DocumentableNode):
@@ -80,15 +77,13 @@ class Visitor(ast.NodeVisitor):
     def _remove_docstring_from_source(code: str, docstring: str) -> str:
         """Removes docstrings from the source code."""
         docstring = ['"""', *docstring.splitlines()]
-        return "\n".join(l for l in code.splitlines() if l.strip() not in docstring)
+        return "\n".join(line for line in code.splitlines() if line.strip() not in docstring)
 
     def _get_sanitized_code(self, node: DocumentableNode) -> str | None:
         """Returns a code segment for a node, sanitized of any docstrings."""
         code = ast.get_source_segment(self.source, node)
         if self._has_doc(node) and code:
-            code = self._remove_docstring_from_source(
-                code=code, docstring=self._get_sanitized_docstring(node)
-            )
+            code = self._remove_docstring_from_source(code=code, docstring=self._get_sanitized_docstring(node))
         return code
 
     def _visit_helper(self, node: DocumentableNode) -> None:
@@ -106,9 +101,7 @@ class Visitor(ast.NodeVisitor):
         if self.stack:
             parent = self.stack[-1]
             parent_path: str = parent.path
-            path = (":" if parent_path.endswith(".py") else ".").join(
-                [parent_path, node_name]
-            )
+            path = (":" if parent_path.endswith(".py") else ".").join([parent_path, node_name])
 
         lineno = None
         if hasattr(node, "lineno"):
@@ -126,9 +119,7 @@ class Visitor(ast.NodeVisitor):
             is_nested_cls=self._is_nested_cls(parent, node_type),
             parent=parent,
             file=file,
-            docstring=(
-                self._get_sanitized_docstring(node) if self._has_doc(node) else None
-            ),
+            docstring=(self._get_sanitized_docstring(node) if self._has_doc(node) else None),
             code=self._get_sanitized_code(node),
         )
 

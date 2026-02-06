@@ -28,9 +28,7 @@ class Extract:
 
     def _add_common_exclude(self):
         for path in self.paths:
-            self.excluded = self.excluded + tuple(
-                os.path.join(path, i) for i in self.COMMON_EXCLUDE
-            )
+            self.excluded = self.excluded + tuple(os.path.join(path, i) for i in self.COMMON_EXCLUDE)
 
     def _filter_files(self, files):
         for file in files:
@@ -76,9 +74,7 @@ class Extract:
         filenames = []
         for path in self.paths:
             if os.path.isfile(path):
-                has_valid_extension = any(
-                    path.endswith(ext) for ext in self.VALID_EXTENSIONS
-                )
+                has_valid_extension = any(path.endswith(ext) for ext in self.VALID_EXTENSIONS)
                 if not has_valid_extension:
                     print(f"invalid file {path}")
                     return sys.exit(1)

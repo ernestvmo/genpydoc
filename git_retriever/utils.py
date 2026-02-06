@@ -61,9 +61,7 @@ def parse_diff(diff_text: str | bytes | None) -> list[DiffChange]:
         text = line[1:] if len(line) else ""
 
         if prefix == " ":
-            changes.append(
-                DiffChange(old_lineno, new_lineno, DiffChangeType.BLANK, text)
-            )
+            changes.append(DiffChange(old_lineno, new_lineno, DiffChangeType.BLANK, text))
             old_lineno += 1
             new_lineno += 1
         elif prefix == "+":
@@ -88,11 +86,7 @@ def process_changes(changes: list[DiffChange]) -> set[int]:
             continue
 
         lineno = next(
-            (
-                item
-                for item in [change.new_lineno, change.old_lineno]
-                if item is not None
-            ),
+            (item for item in [change.new_lineno, change.old_lineno] if item is not None),
             -1,
         )
         if lineno == -1:
@@ -114,17 +108,9 @@ def get_change_type(diff: Diff) -> ChangeType:
         return ChangeType.DELETED
     elif diff.a_path is not None and diff.b_path is None:
         return ChangeType.ADDED
-    elif (
-        diff.a_path is not None
-        and diff.b_path is not None
-        and diff.a_path != diff.b_path
-    ):
+    elif diff.a_path is not None and diff.b_path is not None and diff.a_path != diff.b_path:
         return ChangeType.RENAMED
-    elif (
-        diff.a_path is not None
-        and diff.b_path is not None
-        and diff.a_path == diff.b_path
-    ):
+    elif diff.a_path is not None and diff.b_path is not None and diff.a_path == diff.b_path:
         return ChangeType.MODIFIED
     else:
         print(diff)

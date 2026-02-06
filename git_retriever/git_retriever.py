@@ -22,9 +22,7 @@ class GitRetriever:
         self.__add_all()
         self._diffed_map = self.__build_diffed_map()
 
-        if not self._diffed_map or all(
-            k not in self.covered_nodes.keys() for k in self._diffed_map.keys()
-        ):
+        if not self._diffed_map or all(k not in self.covered_nodes.keys() for k in self._diffed_map.keys()):
             self.__stop_early()
 
     def __add_all(self):
@@ -38,10 +36,7 @@ class GitRetriever:
             return mapping[ct]
 
         d = self.repo.index.diff("HEAD")
-        return {
-            os.path.join(self.root, c.a_path): _reverse_mapping(c.change_type)
-            for c in d
-        }
+        return {os.path.join(self.root, c.a_path): _reverse_mapping(c.change_type) for c in d}
 
     @staticmethod
     def __stop_early():

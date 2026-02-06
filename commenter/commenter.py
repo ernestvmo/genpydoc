@@ -1,7 +1,6 @@
 import asyncio
 import os
 from pathlib import Path
-from pprint import pprint
 from timeit import default_timer as timer
 
 from dotenv import load_dotenv

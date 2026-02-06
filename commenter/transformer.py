@@ -17,9 +17,7 @@ class Transformer(ast.NodeTransformer):
         self.config = config
         self.comments = comments
 
-    def _visit_helper(
-        self, node: ast.ClassDef | ast.FunctionDef | ast.AsyncFunctionDef
-    ):
+    def _visit_helper(self, node: ast.ClassDef | ast.FunctionDef | ast.AsyncFunctionDef):
         if node.name not in self.comments:
             return node
         new_docstring = self.comments[node.name].removeprefix('"""').removesuffix('"""')
@@ -63,9 +61,7 @@ class Parser:
                 convert=self.config.post_processing.convert,
             )
 
-    def post_process(
-        self, filepath: str | Path, cleanup: bool = True, convert: bool = True
-    ):
+    def post_process(self, filepath: str | Path, cleanup: bool = True, convert: bool = True):
         if cleanup:
             subprocess.run(f"black {filepath} -q", shell=True)
         if convert:
