@@ -6,7 +6,7 @@ from fnmatch import fnmatch
 from pathlib import Path
 
 
-from extractor.config import Config
+from config.config import Config
 from extractor.visit import CovNode
 from utils.utils import get_common_base
 from extractor import visit
@@ -16,10 +16,10 @@ class Extract:
     COMMON_EXCLUDE = [".tox", ".venv", "venv", ".git", ".hg"]
     VALID_EXTENSIONS = [".py", ".pyi"]
 
-    def __init__(self, paths):
+    def __init__(self, paths, config: Config | None = None):
         self.paths = paths
         self.extensions = set(".py")
-        self.config = Config()
+        self.config = config if config else Config()
         self.excluded = ()
         self.common_base = pathlib.Path("/")
         self.output_formatter = None
@@ -50,6 +50,12 @@ class Extract:
         if is_empty and self.config.ignore_init_module:
             return []
         return nodes
+
+    @staticmethod
+    def _filter_empty_nodes(nodes: list[CovNode] | None):
+        if not nodes:
+            return None
+        return [node for node in nodes if node.covered]
 
     @staticmethod
     def _filter_inner_nested(nodes: list[CovNode]) -> list[CovNode]:
@@ -94,19 +100,23 @@ class Extract:
         return filenames
 
     def _get_coverage(self, filenames: list[str | Path]):
-        results = []
+        results = {}
+        covered_results = {}
         for filename in filenames:
             result = self._get_file_coverage(filename)
+            covered_result = self._filter_empty_nodes(result)
             if result:
-                results.append(result)
-        return results
+                results[filename] = result
+            if covered_result:
+                covered_results[filename] = covered_result
+        return results, covered_results
 
     def _get_file_coverage(self, filename: str | Path) -> list[CovNode] | None:
         with open(filename) as f:
             source = f.read()
 
         parsed_tree = ast.parse(source)
-        visitor = visit.Visitor(filename, self.config)
+        visitor = visit.Visitor(filename, self.config, source)
         visitor.visit(parsed_tree)
 
         filtered_nodes = self._filter_nodes(visitor.nodes)

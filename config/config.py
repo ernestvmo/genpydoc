@@ -1,4 +1,3 @@
-# remove ignore_regex
 import os.path
 import tomllib
 from pathlib import Path
@@ -27,6 +26,7 @@ class Config:
     ignore_property_decorators: bool = attr.ib(default=False)
     ignore_overloaded_functions: bool = attr.ib(default=False)
     omit_covered_files: bool = attr.ib(default=False)
+    run_on_diff: bool = attr.ib(default=True)
 
     @docstring_style.validator
     def _validate_style(self, _attribute, value):
