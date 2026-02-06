@@ -63,7 +63,3 @@ def get_common_base(files: list[str]) -> str:
     while not commonbase.exists():
         commonbase = commonbase.parent
     return str(commonbase)
-
-
-def test():
-    print()

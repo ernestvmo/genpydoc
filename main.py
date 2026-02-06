@@ -9,9 +9,9 @@ from extractor.extract import Extract
 root = os.path.dirname(__file__)
 
 if __name__ == "__main__":
-    config = Config(run_on_diff=False)
+    config = Config(run_on_diff=False, include_only_covered=False, docstring_style="google")
 
-    e = Extract(["./commenter"], config=config)
+    e = Extract(["./temp"], config=config)
     all_nodes, covered_nodes = e.get_coverage()
 
     if config.include_only_covered:
@@ -23,6 +23,6 @@ if __name__ == "__main__":
         a = GitRetriever(root, covered_nodes, nodes)
         nodes = a.extract_diff()
 
-    commenter = Commenter(config=config)
-    docs = commenter.document(nodes=nodes)
-    print(docs)
+    if nodes:
+        commenter = Commenter(config=config)
+        commenter.document(nodes=nodes)

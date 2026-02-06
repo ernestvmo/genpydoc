@@ -1,4 +1,5 @@
 import os.path
+import re
 import tomllib
 from pathlib import Path
 from typing import Any, Literal
@@ -19,16 +20,16 @@ class Config:
     docstring_style: str = attr.ib(default="sphinx")
     fail_under: float = attr.ib(default=80.0)
     ignore_magic: bool = attr.ib(default=False)
-    ignore_module: bool = attr.ib(default=False)
+    ignore_module: bool = attr.ib(default=True)
     ignore_private: bool = attr.ib(default=False)
     ignore_semiprivate: bool = attr.ib(default=False)
-    ignore_init_method: bool = attr.ib(default=False)
-    ignore_init_module: bool = attr.ib(default=False)
+    ignore_init_method: bool = attr.ib(default=True)
     ignore_nested_classes: bool = attr.ib(default=False)
     ignore_nested_functions: bool = attr.ib(default=False)
     ignore_property_setters: bool = attr.ib(default=False)
     ignore_property_decorators: bool = attr.ib(default=False)
     ignore_overloaded_functions: bool = attr.ib(default=False)
+    include_regex: list[re.Pattern[str]] | None = attr.ib(default=None)
     omit_covered_files: bool = attr.ib(default=False)
     include_only_covered: bool = attr.ib(default=True)
     run_on_diff: bool = attr.ib(default=True)

@@ -16,7 +16,7 @@ dependencies = [
     "python-dotenv (>=1.2.1,<2.0.0)",
     "aiohttp (>=3.13.3,<4.0.0)",
     "requests (>=2.32.5,<3.0.0)",
-    "docstripy (>=0.7.2,<0.8.0)",
+    "docconvert (>=2.2.0,<3.0.0)",
 ]
 
 
@@ -24,28 +24,56 @@ dependencies = [
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.pydocai]
-ignore-init-method = false
-ignore-init-module = false
+[tool.black]
+line-length = 120
+
+[tool.ruff]
+line-length = 120
+
+
+[tool.interrogate]
+#ignore-init-method = true
+ignore-init-module = true
 ignore-magic = false
 ignore-semiprivate = false
 ignore-private = false
 ignore-property-decorators = false
-ignore-module = false
+ignore-module = true
 ignore-nested-functions = false
 ignore-nested-classes = false
 ignore-setters = false
 ignore-overloaded-functions = false
 fail-under = 80
-exclude = ["setup.py", "docs", "build"]
 ext = []
 # possible values: sphinx (default), google
-style = "sphinx"
+style = "google"
 # possible values: 0 (minimal output), 1 (-v), 2 (-vv)
-verbose = 0
-quiet = false
 color = true
 omit-covered-files = false
 # output file logation
 generate-badge = "."
 badge-format = "svg"
+
+[tool.pydocai]
+#ignore-init-method = true
+ignore-init-module = true
+ignore-magic = false
+ignore-semiprivate = false
+ignore-private = false
+ignore-property-decorators = false
+ignore-module = true
+ignore-nested-functions = false
+ignore-nested-classes = false
+ignore-setters = false
+ignore-overloaded-functions = false
+fail-under = 80
+ext = []
+# possible values: sphinx (default), google
+style = "google"
+# possible values: 0 (minimal output), 1 (-v), 2 (-vv)
+color = true
+omit-covered-files = false
+# output file logation
+generate-badge = "."
+badge-format = "svg"
+# TODO extra configs

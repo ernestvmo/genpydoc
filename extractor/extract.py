@@ -37,18 +37,16 @@ class Extract:
             has_valid_ext = any([file.endswith(ext) for ext in self.extensions])
             if not has_valid_ext:
                 continue
-            if self.config.ignore_init_method:
-                basename = os.path.basename(file)
-                if basename == "__init__":
-                    continue
+            basename = os.path.basename(file)
+            if basename == "__init__":  # always ignore __init__ files
+                continue
             if any(fnmatch(file, exc + "*") for exc in self.excluded):
                 continue
             yield file
 
     def _filter_nodes(self, nodes: list[CovNode]) -> list[CovNode]:
-        is_empty = len(nodes) == 1
-        if is_empty and self.config.ignore_init_module:
-            return []
+        if self.config.ignore_module:
+            return [node for node in nodes if node.node_type != "Module"]
         return nodes
 
     @staticmethod
