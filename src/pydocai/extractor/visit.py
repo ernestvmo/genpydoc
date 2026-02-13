@@ -1,10 +1,8 @@
 import ast
 import os.path
 from typing import Self
-
 import attr
-
-from config.config import Config
+from pydocai.config.config import Config
 
 DocumentableFunc = ast.AsyncFunctionDef | ast.FunctionDef
 DocumentableFuncOrClass = DocumentableFunc | ast.ClassDef
@@ -48,12 +46,20 @@ class CovNode:
 
 
 class Visitor(ast.NodeVisitor):
-    """NodeVisitor for a Python file to find docstrings.
+    """Visitor is a NodeVisitor that traverses a Python AST to collect information about
+    docstrings for modules, classes, and functions. During traversal, it builds
+    CovNode records for each visitable node, including metadata such as the node's
+    name, path, type, location, and associated docstring (when present). It also
+    provides sanitized code with any docstrings removed and applies configuration
+    driven ignore rules (e.g., private/semiprivate, __init__, magic methods,
+    property decorators, overloads).
 
-    Args:
-        filename: Filename to parse coverage.
-        config (Config): Configuration.
-        source (str): Source of the visited ast tree.
+    Attributes:
+        filename (str): The name of the file being analyzed.
+        config (Config): Configuration controlling ignore rules and options.
+        source (str): The full source code corresponding to the AST being visited.
+        stack (list[CovNode]): Stack of CovNodes representing the current nesting context.
+        nodes (list[CovNode]): All CovNodes discovered during traversal.
     """
 
     def __init__(self, filename: str, config: Config, source: str):
@@ -66,7 +72,10 @@ class Visitor(ast.NodeVisitor):
     @staticmethod
     def _has_doc(node: DocumentableNode) -> bool:
         """Return whether the node has docstrings."""
-        return ast.get_docstring(node) is not None and ast.get_docstring(node).strip() != ""
+        return (
+            ast.get_docstring(node) is not None
+            and ast.get_docstring(node).strip() != ""
+        )
 
     @staticmethod
     def _get_sanitized_docstring(node: DocumentableNode) -> str:
@@ -77,36 +86,41 @@ class Visitor(ast.NodeVisitor):
     def _remove_docstring_from_source(code: str, docstring: str) -> str:
         """Removes docstrings from the source code."""
         docstring = ['"""', *docstring.splitlines()]
-        return "\n".join(line for line in code.splitlines() if line.strip() not in docstring)
+        return "\n".join(
+            (
+                line
+                for line in code.splitlines()
+                if line.strip() not in docstring
+            )
+        )
 
     def _get_sanitized_code(self, node: DocumentableNode) -> str | None:
         """Returns a code segment for a node, sanitized of any docstrings."""
         code = ast.get_source_segment(self.source, node)
         if self._has_doc(node) and code:
-            code = self._remove_docstring_from_source(code=code, docstring=self._get_sanitized_docstring(node))
+            code = self._remove_docstring_from_source(
+                code=code, docstring=self._get_sanitized_docstring(node)
+            )
         return code
 
     def _visit_helper(self, node: DocumentableNode) -> None:
         """Recursively visit AST node for docstrings."""
         file = os.path.basename(self.filename)
-
         if not hasattr(node, "name"):
             node_name = os.path.basename(self.filename)
         else:
             node_name = node.name
-
         parent = None
         path = node_name
-
         if self.stack:
             parent = self.stack[-1]
             parent_path: str = parent.path
-            path = (":" if parent_path.endswith(".py") else ".").join([parent_path, node_name])
-
+            path = (":" if parent_path.endswith(".py") else ".").join(
+                [parent_path, node_name]
+            )
         lineno = None
         if hasattr(node, "lineno"):
             lineno = node.lineno
-
         node_type = type(node).__name__
         cov_node = CovNode(
             name=node_name,
@@ -119,15 +133,16 @@ class Visitor(ast.NodeVisitor):
             is_nested_cls=self._is_nested_cls(parent, node_type),
             parent=parent,
             file=file,
-            docstring=(self._get_sanitized_docstring(node) if self._has_doc(node) else None),
+            docstring=(
+                self._get_sanitized_docstring(node)
+                if self._has_doc(node)
+                else None
+            ),
             code=self._get_sanitized_code(node),
         )
-
         self.stack.append(cov_node)
         self.nodes.append(cov_node)
-
         self.generic_visit(node)
-
         self.stack.pop()
 
     @staticmethod
@@ -144,7 +159,10 @@ class Visitor(ast.NodeVisitor):
         """Is node a nested func/method of another func/method."""
         if parent is None:
             return False
-        if parent.node_type in ["ClassDef", "FunctionDef"] and node_type == "ClassDef":
+        if (
+            parent.node_type in ["ClassDef", "FunctionDef"]
+            and node_type == "ClassDef"
+        ):
             return True
         return False
 
@@ -172,12 +190,10 @@ class Visitor(ast.NodeVisitor):
         """Commonly-shared ignore checkers."""
         is_private = self._is_private(node)
         is_semiprivate = self._is_semiprivate(node)
-
         if self.config.ignore_private and is_private:
             return True
         if self.config.ignore_semiprivate and is_semiprivate:
             return True
-
         return False
 
     def _is_class_ignored(self, node: DocumentableFuncOrClass) -> bool:
@@ -197,7 +213,6 @@ class Visitor(ast.NodeVisitor):
         has_property_decorators = self._has_property_decorators(node)
         has_setters = self._has_setters(node)
         has_overload = self._has_overload(node)
-
         if self.config.ignore_init_method and is_init:
             return True
         if self.config.ignore_magic and is_magic:
@@ -208,7 +223,6 @@ class Visitor(ast.NodeVisitor):
             return True
         if self.config.ignore_overloaded_functions and has_overload:
             return True
-
         return self._is_ignored_common(node)
 
     @staticmethod
@@ -252,7 +266,7 @@ class Visitor(ast.NodeVisitor):
                     and hasattr(dec, "value")
                     and hasattr(dec.value, "id")
                     and dec.value.id
-                    and dec.attr == "overload"
+                    and (dec.attr == "overload")
                 ):
                     return True
                 if hasattr(dec, "id") and dec.id == "overload":

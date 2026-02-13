@@ -1,16 +1,16 @@
 import os.path
 import sys
+from pathlib import Path
 
 from git import Diff, Repo
-
-from git_retriever.utils import process_git_diff
-from extractor.visit import CovNode
+from pydocai.git_retriever.utils import process_git_diff
+from pydocai.extractor.visit import CovNode
 
 
 class GitRetriever:
     def __init__(
         self,
-        root: str,
+        root: str | Path,
         covered_nodes: dict[str, list[CovNode]],
         nodes: dict[str, list[CovNode]],
     ):
@@ -21,8 +21,12 @@ class GitRetriever:
         self.lines = {}
         self.__add_all()
         self._diffed_map = self.__build_diffed_map()
-
-        if not self._diffed_map or all(k not in self.covered_nodes.keys() for k in self._diffed_map.keys()):
+        if not self._diffed_map or all(
+            (
+                k not in self.covered_nodes.keys()
+                for k in self._diffed_map.keys()
+            )
+        ):
             self.__stop_early()
 
     def __add_all(self) -> None:
@@ -36,7 +40,10 @@ class GitRetriever:
             return mapping[ct]
 
         d = self.repo.index.diff("HEAD")
-        return {os.path.join(self.root, c.a_path): _reverse_mapping(c.change_type) for c in d}
+        return {
+            os.path.join(self.root, c.a_path): _reverse_mapping(c.change_type)
+            for c in d
+        }
 
     @staticmethod
     def __stop_early() -> None:
@@ -55,8 +62,7 @@ class GitRetriever:
                 raise ValueError
             if len(diff):
                 diff = diff[0]
-
-            if self._diffed_map.get(k, "A") == "A":
+            if self._diffed_map.get(k, "A") == "A" and k in self.nodes:
                 lines_for_evaluation[k] = self.nodes[k]
             else:
                 lines = self._match_lines_to_ast(k, self._process_diff(diff))
@@ -67,17 +73,21 @@ class GitRetriever:
         definitions = set()
         for line in lines:
             traversed_nodes: list[CovNode] = []
-            for node in self.nodes[k]:
-                if node.level == 0:
-                    continue
-                if node.lineno <= line < node.lineno + len(node.code.splitlines()):
-                    traversed_nodes.append(node)
+            if k in self.nodes:
+                for node in self.nodes[k]:
+                    if node.level == 0:
+                        continue
+                    if (
+                        node.lineno
+                        <= line
+                        < node.lineno + len(node.code.splitlines())
+                    ):
+                        traversed_nodes.append(node)
             if len(traversed_nodes) > 0:
                 for n in traversed_nodes:
                     definitions.add(n)
             else:
                 continue
-
         return definitions
 
     @staticmethod

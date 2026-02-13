@@ -31,7 +31,9 @@ def parse_pyproject_toml(path_config: str) -> dict[str, Any] | None:
     return {k.replace("-", "_"): v for k, v in config.items()}
 
 
-def read_config_file(ctx: Context, _param: Parameter, value: str | None) -> str | None:
+def read_config_file(
+    ctx: Context, _param: Parameter, value: str | None
+) -> str | None:
     if not value:
         paths = ctx.params.get("paths")
         if not paths:
@@ -44,7 +46,10 @@ def read_config_file(ctx: Context, _param: Parameter, value: str | None) -> str 
         try:
             config = parse_pyproject_toml(value)
         except (tomllib.TOMLDecodeError, OSError) as err:
-            raise click.FileError(filename=value, hint=f"Error reading configuration file: {err}.")
+            raise click.FileError(
+                filename=value,
+                hint=f"Error reading configuration file: {err}.",
+            )
     else:
         print("not handled now")
         return None

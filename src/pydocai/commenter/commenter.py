@@ -7,9 +7,9 @@ from dotenv import load_dotenv
 from openai import AsyncOpenAI as AsyncOpenAIClient
 from tqdm import tqdm
 
-from commenter.transformer import Parser
-from config.config import Config
-from extractor.visit import CovNode
+from pydocai.commenter.transformer import Parser
+from pydocai.config.config import Config
+from pydocai.extractor.visit import CovNode
 
 load_dotenv()
 
@@ -70,11 +70,17 @@ class Commenter:
             "If the old docstring correctly reflects the purpose of the code segment, return -1, else return only the docstring."
         )
 
-    async def openai_process(self, prompt: str, node_name: str, responses: dict[str, str]) -> None:
-        response = await self._client_api.responses.create(model=self._model, input=prompt)
+    async def openai_process(
+        self, prompt: str, node_name: str, responses: dict[str, str]
+    ) -> None:
+        response = await self._client_api.responses.create(
+            model=self._model, input=prompt
+        )
         responses[node_name] = response.output_text
 
-    async def process_prompt(self, prompt: str, node_name: str, responses: dict[str, str]) -> None:
+    async def process_prompt(
+        self, prompt: str, node_name: str, responses: dict[str, str]
+    ) -> None:
         if self.config.use_llm_provider == "openai":
             await self.openai_process(prompt, node_name, responses)
 
@@ -82,9 +88,14 @@ class Commenter:
         responses = {}
         start = timer()
 
-        tasks = [asyncio.create_task(self.process_prompt(prompt, name, responses)) for name, prompt in prompts.items()]
+        tasks = [
+            asyncio.create_task(self.process_prompt(prompt, name, responses))
+            for name, prompt in prompts.items()
+        ]
 
-        with tqdm(total=len(tasks), desc="Commenting", unit="block", leave=True) as pbar:
+        with tqdm(
+            total=len(tasks), desc="Commenting", unit="block", leave=True
+        ) as pbar:
             for fut in asyncio.as_completed(tasks):
                 try:
                     await fut
@@ -98,8 +109,14 @@ class Commenter:
         return responses
 
     async def comment(self, nodes: list[CovNode]) -> dict[str, str]:
-        not_ignored = [n for n in nodes if n.node_type in ["ClassDef", "FunctionDef", "AsyncFunctionDef"]]
-        prompts = {node.name: self.build_prompt(node=node) for node in not_ignored}
+        not_ignored = [
+            n
+            for n in nodes
+            if n.node_type in ["ClassDef", "FunctionDef", "AsyncFunctionDef"]
+        ]
+        prompts = {
+            node.name: self.build_prompt(node=node) for node in not_ignored
+        }
         comments = await self.process_prompts(prompts=prompts)
         return comments
 
@@ -107,4 +124,5 @@ class Commenter:
         for file in nodes:
             print(f"Checking file: {file}.", end="\t")
             docs = asyncio.run(self.comment(nodes[file]))
+            docs = {k: v for k, v in docs.items() if v != "-1"}
             self.parser.process(Path(file), docs)
