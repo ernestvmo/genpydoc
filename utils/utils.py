@@ -44,9 +44,7 @@ def read_config_file(ctx: Context, _param: Parameter, value: str | None) -> str 
         try:
             config = parse_pyproject_toml(value)
         except (tomllib.TOMLDecodeError, OSError) as err:
-            raise click.FileError(
-                filename=value, hint=f"Error reading configuration file: {err}."
-            )
+            raise click.FileError(filename=value, hint=f"Error reading configuration file: {err}.")
     else:
         print("not handled now")
         return None
@@ -59,12 +57,7 @@ def read_config_file(ctx: Context, _param: Parameter, value: str | None) -> str 
 
 
 def get_common_base(files: list[str]) -> str:
-    """TEST"""
     commonbase = Path(commonprefix(files))
     while not commonbase.exists():
         commonbase = commonbase.parent
     return str(commonbase)
-
-
-def test():
-    print()
