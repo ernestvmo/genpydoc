@@ -6,10 +6,10 @@ from fnmatch import fnmatch
 from pathlib import Path
 from typing import Iterator
 
-from config.config import Config
-from extractor.visit import CovNode
-from utils.utils import get_common_base
-from extractor import visit
+from genpydoc.config.config import Config
+from genpydoc.extractor.visit import CovNode
+from genpydoc.utils.utils import get_common_base
+from genpydoc.extractor import visit
 
 
 class Extract:
@@ -28,11 +28,15 @@ class Extract:
 
     def _add_common_exclude(self) -> None:
         for path in self.paths:
-            self.excluded = self.excluded + tuple(os.path.join(path, i) for i in self.COMMON_EXCLUDE)
+            self.excluded = self.excluded + tuple(
+                os.path.join(path, i) for i in self.COMMON_EXCLUDE
+            )
 
     def _filter_files(self, files: list[str]) -> Iterator[str]:
         for file in files:
-            has_valid_ext = any([file.endswith(ext) for ext in self.extensions])
+            has_valid_ext = any(
+                [file.endswith(ext) for ext in self.extensions]
+            )
             if not has_valid_ext:
                 continue
             basename = os.path.basename(file)
@@ -48,7 +52,9 @@ class Extract:
         return nodes
 
     @staticmethod
-    def _filter_empty_nodes(nodes: list[CovNode] | None) -> list[CovNode] | None:
+    def _filter_empty_nodes(
+        nodes: list[CovNode] | None,
+    ) -> list[CovNode] | None:
         if not nodes:
             return None
         return [node for node in nodes if node.covered]
@@ -74,7 +80,9 @@ class Extract:
         filenames = []
         for path in self.paths:
             if os.path.isfile(path):
-                has_valid_extension = any(path.endswith(ext) for ext in self.VALID_EXTENSIONS)
+                has_valid_extension = any(
+                    path.endswith(ext) for ext in self.VALID_EXTENSIONS
+                )
                 if not has_valid_extension:
                     print(f"invalid file {path}")
                     return sys.exit(1)
@@ -93,7 +101,9 @@ class Extract:
         self.common_base = get_common_base(filenames)
         return filenames
 
-    def _get_coverage(self, filenames: list[str | Path]) -> tuple[dict[str, list[CovNode]], dict[str, list[CovNode]]]:
+    def _get_coverage(
+        self, filenames: list[str | Path]
+    ) -> tuple[dict[str, list[CovNode]], dict[str, list[CovNode]]]:
         results: dict[str, list[CovNode]] = {}
         covered_results: dict[str, list[CovNode]] = {}
         for filename in filenames:
@@ -118,7 +128,9 @@ class Extract:
             return None
 
         if self.config.ignore_nested_functions:
-            filtered_nodes = [node for node in filtered_nodes if node.is_nested_func]
+            filtered_nodes = [
+                node for node in filtered_nodes if node.is_nested_func
+            ]
 
         if self.config.ignore_nested_classes:
             filtered_nodes = self._filter_inner_nested(filtered_nodes)
@@ -128,6 +140,8 @@ class Extract:
 
         return filtered_nodes
 
-    def get_coverage(self) -> tuple[dict[str, list[CovNode]], dict[str, list[CovNode]]]:
+    def get_coverage(
+        self,
+    ) -> tuple[dict[str, list[CovNode]], dict[str, list[CovNode]]]:
         filenames = self.get_filenames_from_path()
         return self._get_coverage(filenames)

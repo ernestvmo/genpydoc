@@ -1,13 +1,12 @@
 [project]
-name = "pydocai"
-version = "0.0.1"
+name = "genpydoc"
+version = "1.0.2"
 description = "Use AI agent to analyze if a method's documentation is correct and sufficient."
 authors = [
     {name = "Ernest Vanmosuinck",email = "ernest.vanmo@gmail.com"}
 ]
 readme = "README.md"
 requires-python = ">=3.11"
-package-mode = false
 dependencies = [
     "gitpython (>=3.1.46,<4.0.0)",
     "black (>=26.1.0,<27.0.0)",
@@ -17,63 +16,32 @@ dependencies = [
     "aiohttp (>=3.13.3,<4.0.0)",
     "requests (>=2.32.5,<3.0.0)",
     "docconvert (>=2.2.0,<3.0.0)",
+    "setuptools (>=82.0.0,<83.0.0)",
 ]
+build-backend = "setuptools.build_meta"
+
+[tool.check-wheel-contents]
+toplevel = ["interrogate"]
 
 
 [build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
+requires = ["poetry-core>=2.0.0,<3.0.0","setuptools >= 77.0.3"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.black]
-line-length = 120
+line-length = 79
 
 [tool.ruff]
-line-length = 120
+line-length = 79
 
-
-[tool.interrogate]
-#ignore-init-method = true
-ignore-init-module = true
+[tool.genpydoc]
 ignore-magic = false
 ignore-semiprivate = false
 ignore-private = false
 ignore-property-decorators = false
-ignore-module = true
 ignore-nested-functions = false
 ignore-nested-classes = false
 ignore-setters = false
 ignore-overloaded-functions = false
-fail-under = 80
-ext = []
 # possible values: sphinx (default), google
 style = "google"
-# possible values: 0 (minimal output), 1 (-v), 2 (-vv)
-color = true
-omit-covered-files = false
-# output file logation
-generate-badge = "."
-badge-format = "svg"
-
-[tool.pydocai]
-#ignore-init-method = true
-ignore-init-module = true
-ignore-magic = false
-ignore-semiprivate = false
-ignore-private = false
-ignore-property-decorators = false
-ignore-module = true
-ignore-nested-functions = false
-ignore-nested-classes = false
-ignore-setters = false
-ignore-overloaded-functions = false
-fail-under = 80
-ext = []
-# possible values: sphinx (default), google
-style = "google"
-# possible values: 0 (minimal output), 1 (-v), 2 (-vv)
-color = true
-omit-covered-files = false
-# output file logation
-generate-badge = "."
-badge-format = "svg"
-# TODO extra configs
