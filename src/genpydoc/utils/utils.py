@@ -42,7 +42,7 @@ def read_config_file(
         if value is None:
             return None
 
-    if value.endswith(".toml"):
+    if value.suffix == ".toml":
         try:
             config = parse_pyproject_toml(value)
         except (tomllib.TOMLDecodeError, OSError) as err:
