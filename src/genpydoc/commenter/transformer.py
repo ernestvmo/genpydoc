@@ -1,7 +1,7 @@
 import ast
 import subprocess
 from pathlib import Path
-from pydocai.config.config import Config
+from genpydoc.config.config import Config
 
 DocumentableFunc = ast.AsyncFunctionDef | ast.FunctionDef
 DocumentableFuncOrClass = DocumentableFunc | ast.ClassDef

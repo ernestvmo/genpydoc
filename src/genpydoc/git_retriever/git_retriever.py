@@ -3,8 +3,8 @@ import sys
 from pathlib import Path
 
 from git import Diff, Repo
-from pydocai.git_retriever.utils import process_git_diff
-from pydocai.extractor.visit import CovNode
+from genpydoc.git_retriever.utils import process_git_diff
+from genpydoc.extractor.visit import CovNode
 
 
 class GitRetriever:

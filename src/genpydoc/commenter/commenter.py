@@ -7,9 +7,9 @@ from dotenv import load_dotenv
 from openai import AsyncOpenAI as AsyncOpenAIClient
 from tqdm import tqdm
 
-from pydocai.commenter.transformer import Parser
-from pydocai.config.config import Config
-from pydocai.extractor.visit import CovNode
+from genpydoc.commenter.transformer import Parser
+from genpydoc.config.config import Config
+from genpydoc.extractor.visit import CovNode
 
 load_dotenv()
 

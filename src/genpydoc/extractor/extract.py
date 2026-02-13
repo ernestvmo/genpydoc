@@ -6,10 +6,10 @@ from fnmatch import fnmatch
 from pathlib import Path
 from typing import Iterator
 
-from pydocai.config.config import Config
-from pydocai.extractor.visit import CovNode
-from pydocai.utils.utils import get_common_base
-from pydocai.extractor import visit
+from genpydoc.config.config import Config
+from genpydoc.extractor.visit import CovNode
+from genpydoc.utils.utils import get_common_base
+from genpydoc.extractor import visit
 
 
 class Extract:

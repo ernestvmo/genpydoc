@@ -1,9 +1,9 @@
 import os
 
 import click
-from pydocai.config.config import Config
-from pydocai.documenter import Documenter
-from pydocai.utils.utils import read_config_file
+from genpydoc.config.config import Config
+from genpydoc.documenter import Documenter
+from genpydoc.utils.utils import read_config_file
 
 
 @click.command()

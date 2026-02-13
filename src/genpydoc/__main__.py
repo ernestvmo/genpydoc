@@ -1,4 +1,4 @@
-from pydocai.cli import main
+from genpydoc.cli import main
 
 if __name__ == "__main__":
     main()

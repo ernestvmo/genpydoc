@@ -1,5 +1,5 @@
 [project]
-name = "pydocai"
+name = "genpydoc"
 version = "1.0.1"
 description = "Use AI agent to analyze if a method's documentation is correct and sufficient."
 authors = [
@@ -34,7 +34,7 @@ line-length = 79
 [tool.ruff]
 line-length = 79
 
-[tool.pydocai]
+[tool.genpydoc]
 ignore-magic = false
 ignore-semiprivate = false
 ignore-private = false

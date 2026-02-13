@@ -2,7 +2,7 @@ import tomllib
 from typing import Any, Literal, Sequence
 
 import attr
-from pydocai.utils.utils import find_project_root
+from genpydoc.utils.utils import find_project_root
 
 
 class PostProcessingConfig:
@@ -58,5 +58,5 @@ def find_project_config(path_search_start: Sequence[str]) -> str | None:
 def parse_pyproject_toml(path_config: str) -> dict[str, Any] | None:
     with open(path_config, "rb") as file:
         toml = tomllib.load(file)
-    config = toml.get("tool", {}).get("pydocai")
+    config = toml.get("tool", {}).get("genpydoc")
     return {k.replace("-", "_"): v for k, v in config.items()}

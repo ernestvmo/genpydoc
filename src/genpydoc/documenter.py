@@ -1,10 +1,10 @@
 import os
 
-from pydocai.commenter.commenter import Commenter
-from pydocai.config.config import Config
-from pydocai.utils.utils import find_project_root
-from pydocai.extractor.extract import Extract
-from pydocai.git_retriever.git_retriever import GitRetriever
+from genpydoc.commenter.commenter import Commenter
+from genpydoc.config.config import Config
+from genpydoc.utils.utils import find_project_root
+from genpydoc.extractor.extract import Extract
+from genpydoc.git_retriever.git_retriever import GitRetriever
 
 
 class Documenter:

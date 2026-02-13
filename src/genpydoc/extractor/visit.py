@@ -2,7 +2,7 @@ import ast
 import os.path
 from typing import Self
 import attr
-from pydocai.config.config import Config
+from genpydoc.config.config import Config
 
 DocumentableFunc = ast.AsyncFunctionDef | ast.FunctionDef
 DocumentableFuncOrClass = DocumentableFunc | ast.ClassDef
