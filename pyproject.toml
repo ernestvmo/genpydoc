@@ -1,11 +1,11 @@
 [project]
 name = "genpydoc"
-version = "1.0.5"
+version = "1.0.6"
 description = "Use AI agent to analyze if a method's documentation is correct and sufficient."
 authors = [
     {name = "Ernest Vanmosuinck",email = "ernest.vanmo@gmail.com"}
 ]
-readme = "README.md"
+readme = "README.rst"
 requires-python = ">=3.11"
 dependencies = [
     "gitpython (>=3.1.46,<4.0.0)",
@@ -45,3 +45,13 @@ ignore-setters = false
 ignore-overloaded-functions = false
 # possible values: sphinx (default), google
 style = "google"
+
+[dependency-groups]
+dev = [
+    "sphinx-autobuild (>=2025.8.25,<2026.0.0)"
+]
+docs = [
+    "sphinx (>=9.0.4)",
+    "furo (>=2025.12.19,<2026.0.0)",
+    "sphinx-copybutton (>=0.5.2,<0.6.0)"
+]
