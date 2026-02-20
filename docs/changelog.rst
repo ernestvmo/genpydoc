@@ -4,7 +4,7 @@ Changelog
 1.0.6
 -----
 
-Create and publish documentation to `Read the Docs https://genpydoc.readthedocs.io/en/latest/index.html`_.
+Create and publish documentation to `Read the Docs <https://genpydoc.readthedocs.io/en/latest/index.html>`_.
 
 
 1.0.5
