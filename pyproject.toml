@@ -1,6 +1,6 @@
 [project]
 name = "genpydoc"
-version = "1.0.6"
+version = "1.0.7"
 description = "Use AI agent to analyze if a method's documentation is correct and sufficient."
 authors = [
     {name = "Ernest Vanmosuinck",email = "ernest.vanmo@gmail.com"}
@@ -17,8 +17,6 @@ dependencies = [
     "requests (>=2.32.5,<3.0.0)",
     "docconvert (>=2.2.0,<3.0.0)",
     "setuptools (>=82.0.0,<83.0.0)",
-    "furo (>=2025.12.19,<2026.0.0)",
-    "sphinx-copybutton (>=0.5.2,<0.6.0)",
 ]
 build-backend = "setuptools.build_meta"
 
@@ -47,7 +45,13 @@ ignore-setters = false
 ignore-overloaded-functions = false
 # possible values: sphinx (default), google
 style = "google"
+
 [dependency-groups]
 dev = [
     "sphinx-autobuild (>=2025.8.25,<2026.0.0)"
+]
+docs = [
+    "sphinx (>=9.0.4)",
+    "furo (>=2025.12.19,<2026.0.0)",
+    "sphinx-copybutton (>=0.5.2,<0.6.0)"
 ]
