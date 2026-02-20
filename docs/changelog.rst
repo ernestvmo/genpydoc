@@ -4,7 +4,7 @@ Changelog
 1.0.6
 -----
 
-`Read the Docs <read>`_ for the project.
+Create and publish documentation to `Read the Docs <read>`_.
 
 
 1.0.5
