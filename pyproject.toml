@@ -5,7 +5,7 @@ description = "Use AI agent to analyze if a method's documentation is correct an
 authors = [
     {name = "Ernest Vanmosuinck",email = "ernest.vanmo@gmail.com"}
 ]
-readme = "README.md"
+readme = "README.rst"
 requires-python = ">=3.11"
 dependencies = [
     "gitpython (>=3.1.46,<4.0.0)",
