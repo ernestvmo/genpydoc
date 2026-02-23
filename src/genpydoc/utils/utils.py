@@ -66,9 +66,7 @@ def find_project_config(path_search_start: Sequence[str]) -> str | None:
     pyproject_toml = project_root / "pyproject.toml"
     if pyproject_toml.is_file():
         return str(pyproject_toml)
-
-    setup_cfg = project_root / "setup.cfg"
-    return str(setup_cfg) if setup_cfg.is_file() else None
+    return None
 
 
 def get_common_base(files: list[str]) -> str:
