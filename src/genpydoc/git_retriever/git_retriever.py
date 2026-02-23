@@ -1,24 +1,27 @@
 import os.path
 import sys
-from pathlib import Path
 
 from git import Diff, Repo
-from genpydoc.git_retriever.utils import process_git_diff
+from genpydoc.config.config import Config
 from genpydoc.extractor.visit import CovNode
+from genpydoc.git_retriever.utils import process_git_diff
 
 
 class GitRetriever:
     def __init__(
         self,
-        root: str | Path,
         covered_nodes: dict[str, list[CovNode]],
         nodes: dict[str, list[CovNode]],
+        config: Config,
     ):
-        self.root = root
-        self.repo = Repo(root)
+        self.root = config.root
+        self.repo = Repo(self.root)
         self.covered_nodes = covered_nodes
         self.nodes = nodes
         self.lines = {}
+        self.target_branch = config.target_branch
+        self.config = config
+
         self.__add_all()
         self._diffed_map = self.__build_diffed_map()
         if not self._diffed_map or all(
@@ -39,10 +42,11 @@ class GitRetriever:
                 return ct
             return mapping[ct]
 
-        d = self.repo.index.diff("HEAD")
+        d = self.repo.index.diff(self.target_branch)
         return {
             os.path.join(self.root, c.a_path): _reverse_mapping(c.change_type)
             for c in d
+            if c.a_path.endswith(".py")
         }
 
     @staticmethod
@@ -57,7 +61,9 @@ class GitRetriever:
     def _extract_lines(self) -> dict[str, set[CovNode]]:
         lines_for_evaluation: dict[str, set[CovNode]] = {}
         for k in self._diffed_map.keys():
-            diff = self.repo.index.diff("HEAD", paths=k, create_patch=True)
+            diff = self.repo.index.diff(
+                self.target_branch, paths=k, create_patch=True
+            )
             if len(diff) > 1:
                 raise ValueError
             if len(diff):
@@ -90,13 +96,15 @@ class GitRetriever:
                 continue
         return definitions
 
-    @staticmethod
     def _analyze_covered_nodes(
+        self,
         diffed_nodes: dict[str, set[CovNode]],
     ) -> dict[str, set[CovNode]]:
         keys = list(diffed_nodes.keys())
         for k in keys:
-            nodes = {node for node in diffed_nodes[k] if node.covered}
+            nodes = diffed_nodes[k]
+            if self.config.include_only_covered:
+                nodes = {node for node in nodes if node.covered}
             if not nodes:
                 del diffed_nodes[k]
                 continue

@@ -58,7 +58,7 @@ You can specify the following parameters, either in the ``pyproject.toml`` or th
     ignore-semiprivate = false
     include-only-covered = false
     run-on-diff = false
-    use-llm-provider = "llama"
+    use-llm-provider = "openai"
     use-model = "gpt-5-nano"
     style = "google"
 

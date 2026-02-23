@@ -1,6 +1,6 @@
 [project]
 name = "genpydoc"
-version = "1.0.8"
+version = "1.0.9"
 description = "Use AI agent to analyze if a method's documentation is correct and sufficient."
 authors = [
     { name = "Ernest Vanmosuinck", email = "ernest.vanmo@gmail.com" }
@@ -44,8 +44,9 @@ ignore-property-decorators = false
 ignore-setters = false
 ignore-semiprivate = false
 include-only-covered = false
-run-on-diff = false
-use-llm-provider = "llama"
+run-on-diff = true
+target-branch = "v1.0.4"
+use-llm-provider = "openai"
 use-model = "gpt-5-nano"
 style = "google"
 
