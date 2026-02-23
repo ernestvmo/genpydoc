@@ -1,8 +1,7 @@
 import tomllib
-from typing import Any, Literal, Sequence
+from typing import Any, Literal
 
 import attr
-from genpydoc.utils.utils import find_project_root
 
 
 class PostProcessingConfig:
@@ -13,7 +12,7 @@ class PostProcessingConfig:
 @attr.s
 class Config:
     VALID_STYLES = ("sphinx", "google")  # FIXME needed?
-    VALID_MODELS = ("openai",)
+    VALID_LLM_PROVIDERS = ("openai",)
 
     docstring_style: str = attr.ib(default="sphinx")
     ignore_magic: bool = attr.ib(default=False)
@@ -36,23 +35,19 @@ class Config:
         default=PostProcessingConfig()
     )
 
+    @use_llm_provider.validator
+    def _validate_llm_provider(self, _attribute, value) -> None:
+        if value not in self.VALID_LLM_PROVIDERS:
+            raise ValueError(
+                f"Invalid LLM provider '{value}'.\nSelect one of the following: {', '.join(self.VALID_LLM_PROVIDERS)}"
+            )
+
     @docstring_style.validator
     def _validate_style(self, _attribute, value) -> None:
         if value not in self.VALID_STYLES:
             raise ValueError(
                 f"invalid docstring_style '{value}'.\nSelect one of the following: {', '.join(self.VALID_STYLES)}"
             )
-
-
-def find_project_config(path_search_start: Sequence[str]) -> str | None:
-    """Find the absolute filepath to a pyproject.toml if it exists."""
-    project_root = find_project_root(path_search_start)
-    pyproject_toml = project_root / "pyproject.toml"
-    if pyproject_toml.is_file():
-        return str(pyproject_toml)
-
-    setup_cfg = project_root / "setup.cfg"
-    return str(setup_cfg) if setup_cfg.is_file() else None
 
 
 def parse_pyproject_toml(path_config: str) -> dict[str, Any] | None:

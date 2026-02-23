@@ -42,75 +42,67 @@ Configuration
 You can specify the following parameters, either in the ``pyproject.toml`` or through command line.
 
 
+``pyproject.toml`` Configuration
+--------------------------------
+
+.. code-block::
+
+    [tool.genpydoc]
+    ignore-magic = false
+    ignore-nested-classes = false
+    ignore-nested-functions = false
+    ignore-overloaded-functions = false
+    ignore-private = false
+    ignore-property-decorators = false
+    ignore-setters = false
+    ignore-semiprivate = false
+    include-only-covered = false
+    run-on-diff = false
+    use-llm-provider = "llama"
+    use-model = "gpt-5-nano"
+    style = "google"
+
+
 Command line options
 --------------------
 
-.. option:: -m, --ignore-magic
+.. code-block::
 
-    Ignore all magic methods of classes.
-    [default: False]
+    Usage: python -m genpydoc [OPTIONS] [PATHS]...
 
-    NOTE: This does not include the `__init__`
-    method. To ignore `__init__` methods, use
-    `--ignore-init-method`.
+    Options:
+      -m, --ignore-magic              Ignore all magic methods of classes.
+                                      [default: False]
 
-.. option:: -C, --ignore-nested-classes
+                                      NOTE: This does not include the `__init__`
+                                      method. To ignore `__init__` methods, use
+                                      `--ignore-init-method`.
+      -C, --ignore-nested-classes     Ignore nested classes.
+      -n, --ignore-nested-functions   Ignore nested functions and methods.
+      -O, --ignore-overloaded-functions
+                                      Ignore `@typing.overload`-decorated
+                                      functions.
+      -p, --ignore-private            Ignore private classes, methods, and
+                                      functions starting with two underscores.
+                                      [default: False]
 
-    Ignore nested classes.
-
-.. option:: -n, --ignore-nested-functions
-
-    Ignore nested functions and methods.
-
-.. option:: -O, --ignore-overloaded-functions
-
-    Ignore `@typing.overload`-decorated functions.
-
-.. option:: -p, --ignore-private
-
-    Ignore private classes, methods, and functions starting with two underscores. [default: False]
-
-    NOTE: This does not include magic methods;
-    use `--ignore-magic` and/or `--ignore-init-
-    method` instead.
-
-.. option:: -P, --ignore-property-decorators
-
-    Ignore methods with property setter/getter/deleter decorators.
-
-.. option:: -S, --ignore-setters
-
-    Ignore methods with property setter decorators.
-
-.. option:: -s, --ignore-semiprivate
-
-    Ignore semiprivate classes, methods, and functions starting with a single underscore.
-
-.. option:: -o, --include_only_covered
-
-    Only include Node that have a docstring in the processing.
-
-.. option:: -D, --run_on_diff
-
-    Only run the evaluator on Git diffed Nodes.
-
-.. option:: --use_llm_provider [openai]
-
-
-    [default: openai]
-
-.. option:: --use_model [gpt-5-nano]
-
-    [default: gpt-5-nano]
-
-.. option:: --style [google|numpy|epytext|reST]
-
-    [default: google]
-
-.. option:: -h, --help
-
-    Show this message and exit.
-
-.. option:: -c, --config FILE
-
-    Read configuration from `pyproject.toml`.
+                                      NOTE: This does not include magic methods;
+                                      use `--ignore-magic` and/or `--ignore-init-
+                                      method` instead.
+      -P, --ignore-property-decorators
+                                      Ignore methods with property
+                                      setter/getter/deleter decorators.
+      -S, --ignore-setters            Ignore methods with property setter
+                                      decorators.
+      -s, --ignore-semiprivate        Ignore semiprivate classes, methods, and
+                                      functions starting with a single underscore.
+      -o, --include-only-covered      Only include Node that have a docstring in
+                                      the processing.
+      -D, --run-on-diff               Only run the evaluator on Git diffed Nodes.
+      --use-llm-provider [openai]     Select the LLM provider.  [default: openai]
+      --use-model [gpt-5-nano]        Select which LLM model to use for
+                                      documenting.  [default: gpt-5-nano]
+      --style [google|numpy|epytext|reST]
+                                      Docstring types allowed.  [default: google]
+      -h, --help                      Show this message and exit.
+      -c, --config FILE               Read configuration from `pyproject.toml`.
