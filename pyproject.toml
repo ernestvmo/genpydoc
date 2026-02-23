@@ -1,9 +1,9 @@
 [project]
 name = "genpydoc"
-version = "1.0.6"
+version = "1.0.7"
 description = "Use AI agent to analyze if a method's documentation is correct and sufficient."
 authors = [
-    {name = "Ernest Vanmosuinck",email = "ernest.vanmo@gmail.com"}
+    { name = "Ernest Vanmosuinck", email = "ernest.vanmo@gmail.com" }
 ]
 readme = "README.rst"
 requires-python = ">=3.11"
@@ -25,7 +25,7 @@ toplevel = ["interrogate"]
 
 
 [build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0","setuptools >= 77.0.3"]
+requires = ["poetry-core>=2.0.0,<3.0.0", "setuptools >= 77.0.3"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.black]
@@ -36,14 +36,17 @@ line-length = 79
 
 [tool.genpydoc]
 ignore-magic = false
-ignore-semiprivate = false
+ignore-nested-classes = false
+ignore-nested-functions = false
+ignore-overloaded-functions = false
 ignore-private = false
 ignore-property-decorators = false
-ignore-nested-functions = false
-ignore-nested-classes = false
 ignore-setters = false
-ignore-overloaded-functions = false
-# possible values: sphinx (default), google
+ignore-semiprivate = false
+include-only-covered = false
+run-on-diff = false
+use-llm-provider = "llama"
+use-model = "gpt-5-nano"
 style = "google"
 
 [dependency-groups]
@@ -58,7 +61,7 @@ docs = [
 
 [project.optional-dependencies]
 docs = [
-  "sphinx>=9.0.4",
-  "furo>=2025.12.19,<2026.0.0",
-  "sphinx-copybutton>=0.5.2,<0.6.0",
+    "sphinx>=9.0.4",
+    "furo>=2025.12.19,<2026.0.0",
+    "sphinx-copybutton>=0.5.2,<0.6.0",
 ]

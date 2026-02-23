@@ -85,7 +85,7 @@ from genpydoc.utils.utils import read_config_file
 )
 @click.option(
     "-o",
-    "--include_only_covered",
+    "--include-only-covered",
     is_flag=True,
     default=False,
     show_default=True,
@@ -93,29 +93,32 @@ from genpydoc.utils.utils import read_config_file
 )
 @click.option(
     "-D",
-    "--run_on_diff",
+    "--run-on-diff",
     is_flag=True,
     default=False,
     show_default=True,
     help="Only run the evaluator on Git diffed Nodes.",
 )
 @click.option(
-    "--use_llm_provider",
+    "--use-llm-provider",
     type=click.Choice(["openai"]),
     default="openai",
     show_default=True,
+    help="Select the LLM provider.",
 )
 @click.option(
-    "--use_model",
+    "--use-model",
     type=click.Choice(["gpt-5-nano"]),
     default="gpt-5-nano",
     show_default=True,
+    help="Select which LLM model to use for documenting.",
 )
 @click.option(
     "--style",
     type=click.Choice(["google", "numpy", "epytext", "reST"]),
     default="google",
     show_default=True,
+    help="Docstring types allowed.",
 )
 @click.help_option("-h", "--help")
 @click.argument(
@@ -139,7 +142,7 @@ from genpydoc.utils.utils import read_config_file
     ),
     is_eager=True,
     callback=read_config_file,
-    help="Read configuration from `pyproject.toml`.",
+    help="Read configuration from `pyproject.toml` or `setup.cfg`.",
 )
 def main(
     paths: list[str] | None,

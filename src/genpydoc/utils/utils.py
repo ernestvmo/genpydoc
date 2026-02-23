@@ -2,7 +2,7 @@ from os.path import commonprefix
 from pathlib import Path
 import os
 import tomllib
-from typing import Any
+from typing import Any, Sequence
 
 import click
 from click import Context, Parameter
@@ -38,9 +38,11 @@ def read_config_file(
         paths = ctx.params.get("paths")
         if not paths:
             paths = (os.path.abspath(os.getcwd()),)
-        value = find_project_root(paths)
+        value = find_project_config(paths)
         if value is None:
             return None
+
+    print(f"{value=}")
 
     if value.suffix == ".toml":
         try:
@@ -50,15 +52,23 @@ def read_config_file(
                 filename=value,
                 hint=f"Error reading configuration file: {err}.",
             )
-    else:
-        print("not handled now")
-        return None
 
     if ctx.default_map is None:
         ctx.default_map = {}
 
     ctx.default_map.update(config)
     return value
+
+
+def find_project_config(path_search_start: Sequence[str]) -> str | None:
+    """Find the absolute filepath to a pyproject.toml if it exists."""
+    project_root = find_project_root(path_search_start)
+    pyproject_toml = project_root / "pyproject.toml"
+    if pyproject_toml.is_file():
+        return str(pyproject_toml)
+
+    setup_cfg = project_root / "setup.cfg"
+    return str(setup_cfg) if setup_cfg.is_file() else None
 
 
 def get_common_base(files: list[str]) -> str:
