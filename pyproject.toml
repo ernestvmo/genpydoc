@@ -1,6 +1,6 @@
 [project]
 name = "genpydoc"
-version = "1.0.7"
+version = "1.0.8"
 description = "Use AI agent to analyze if a method's documentation is correct and sufficient."
 authors = [
     { name = "Ernest Vanmosuinck", email = "ernest.vanmo@gmail.com" }
