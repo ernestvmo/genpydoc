@@ -1,5 +1,6 @@
 import os
 
+from genpydoc.commenter import Commenter
 from genpydoc.config.config import Config
 from genpydoc.utils.utils import find_project_root
 from genpydoc.extractor.extract import Extract
@@ -27,10 +28,8 @@ class Documenter:
             gitter = GitRetriever(root, covered_nodes, nodes)
             nodes = gitter.extract_diff()
 
-        print(nodes)
-
-        # if nodes:
-        #     commenter = Commenter(config=self.config)
-        #     commenter.document(nodes=nodes)
-        # else:
-        #     print("Nothing to comment.")
+        if nodes:
+            commenter = Commenter(config=self.config)
+            commenter.document(nodes=nodes)
+        else:
+            print("Nothing to comment.")
