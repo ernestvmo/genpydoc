@@ -43,7 +43,7 @@ jobs:
       - name: Run genpydoc (may modify files)
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: python -m genpydoc . -o -D --target-branch "${{ github.base_ref }}"
+        run: python -m genpydoc . -D --target-branch "${{ github.base_ref }}"
 
       - name: Create PR with any generated changes
         uses: peter-evans/create-pull-request@v6
