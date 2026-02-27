@@ -100,11 +100,26 @@ from genpydoc.utils.utils import read_config_file
     help="Only run the evaluator on Git diffed Nodes.",
 )
 @click.option(
+    "-d",
+    "--run-staged",
+    is_flag=True,
+    default=False,
+    show_default=True,
+    help="Only run the evaluator on Git diffed Nodes.",
+)
+@click.option(
     "--use-llm-provider",
     type=click.Choice(["openai"]),
     default="openai",
     show_default=True,
     help="Select the LLM provider.",
+)
+@click.option(
+    "--target-branch",
+    type=click.STRING,
+    default="main",
+    show_default=True,
+    help="Provide the target branch for running git comparison.",
 )
 @click.option(
     "--use-model",
@@ -156,6 +171,8 @@ def main(
     ignore_overloaded_functions: bool,
     include_only_covered: bool,
     run_on_diff: bool,
+    run_staged: bool,
+    target_branch: str,
     use_llm_provider: str,
     use_model: str,
     style: str,
@@ -173,6 +190,8 @@ def main(
         ignore_overloaded_functions=ignore_overloaded_functions,
         include_only_covered=include_only_covered,
         run_on_diff=run_on_diff,
+        run_staged=run_staged,
+        target_branch=target_branch,
         use_llm_provider=use_llm_provider,
         use_model=use_model,
     )

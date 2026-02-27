@@ -1,5 +1,4 @@
-from pprint import pprint
-
+from genpydoc.commenter.commenter import Commenter
 from genpydoc.config.config import Config
 from genpydoc.extractor.extract import Extract
 from genpydoc.git_retriever.git_retriever import GitRetriever
@@ -27,10 +26,8 @@ class Documenter:
             )
             nodes = gitter.extract_diff()
 
-        pprint(nodes)
-
-        # if nodes:
-        #     commenter = Commenter(config=self.config)
-        #     commenter.document(nodes=nodes)
-        # else:
-        #     print("Nothing to comment.")
+        if nodes:
+            commenter = Commenter(config=self.config)
+            commenter.document(nodes=nodes)
+        else:
+            print("Nothing to comment.")

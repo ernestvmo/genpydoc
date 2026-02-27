@@ -25,6 +25,7 @@ class Extract:
         self.output_formatter = None
         self._add_common_exclude()
         self.skipped_file_count = 0
+        print()
 
     def _add_common_exclude(self) -> None:
         for path in self.paths:

@@ -32,6 +32,7 @@ class Config:
     ignore_overloaded_functions: bool = attr.ib(default=False)
     include_only_covered: bool = attr.ib(default=True)
     run_on_diff: bool = attr.ib(default=True)
+    run_staged: bool = attr.ib(default=False)
     target_branch: str | None = attr.ib(default="main")
     use_llm_provider: Literal["openai"] = attr.ib(default="openai")
     use_model: str = attr.ib(default="gpt-5-nano")  # TODO validate

@@ -38,16 +38,19 @@ class Transformer(ast.NodeTransformer):
     def visit_ClassDef(
         self, node: DocumentableFuncOrClass
     ) -> DocumentableFuncOrClass:
+        self.generic_visit(node=node)
         return self._visit_helper(node=node)
 
     def visit_FunctionDef(
         self, node: DocumentableFuncOrClass
     ) -> DocumentableFuncOrClass:
+        self.generic_visit(node=node)
         return self._visit_helper(node=node)
 
     def visit_AsyncFunctionDef(
         self, node: DocumentableFuncOrClass
     ) -> DocumentableFuncOrClass:
+        self.generic_visit(node=node)
         return self._visit_helper(node=node)
 
 
@@ -58,10 +61,12 @@ class Parser:
     def process(self, filepath: Path, comments: dict[str, str]) -> None:
         with open(filepath) as file:
             source = file.read()
+
         parsed_tree = ast.parse(source)
         t = Transformer(config=self.config, comments=comments)
         t.visit(parsed_tree)
         filepath.write_text(ast.unparse(parsed_tree))
+
         if (
             self.config.post_processing.cleanup
             or self.config.post_processing.convert

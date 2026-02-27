@@ -19,11 +19,12 @@ class GitRetriever:
         self.covered_nodes = covered_nodes
         self.nodes = nodes
         self.lines = {}
-        self.target_branch = config.target_branch
+        self.current_branch = self.repo.active_branch
         self.config = config
 
         self.__add_all()
         self._diffed_map = self.__build_diffed_map()
+
         if not self._diffed_map or all(
             (
                 k not in self.covered_nodes.keys()
@@ -37,12 +38,17 @@ class GitRetriever:
 
     def __build_diffed_map(self) -> dict[str, str]:
         def _reverse_mapping(ct: str | None) -> str:
-            mapping = {"D": "A", "A": "D"}
+            mapping = {"D": "A", "A": "D"} if self.config.run_staged else {}
             if ct not in mapping:
                 return ct
             return mapping[ct]
 
-        d = self.repo.index.diff(self.target_branch)
+        if self.config.run_staged:
+            d = self.repo.index.diff(self.config.target_branch)
+        else:
+            d = self.repo.commit(self.current_branch).diff(
+                self.config.target_branch
+            )
         return {
             os.path.join(self.root, c.a_path): _reverse_mapping(c.change_type)
             for c in d
@@ -61,9 +67,14 @@ class GitRetriever:
     def _extract_lines(self) -> dict[str, set[CovNode]]:
         lines_for_evaluation: dict[str, set[CovNode]] = {}
         for k in self._diffed_map.keys():
-            diff = self.repo.index.diff(
-                self.target_branch, paths=k, create_patch=True
-            )
+            if self.config.run_staged:
+                diff = self.repo.index.diff(
+                    self.config.target_branch, paths=k, create_patch=True
+                )
+            else:
+                diff = self.repo.commit(self.current_branch).diff(
+                    self.config.target_branch, paths=k, create_patch=True
+                )
             if len(diff) > 1:
                 raise ValueError
             if len(diff):
