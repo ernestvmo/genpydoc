@@ -135,6 +135,14 @@ from genpydoc.utils.utils import read_config_file
     show_default=True,
     help="Docstring types allowed.",
 )
+@click.option(
+    "-v",
+    "--verbose",
+    is_flag=True,
+    default=True,
+    show_default=True,
+    help="Show logs.",
+)
 @click.help_option("-h", "--help")
 @click.argument(
     "paths",
@@ -176,6 +184,7 @@ def main(
     use_llm_provider: str,
     use_model: str,
     style: str,
+    verbose: bool,
     config: str | None,
 ):
     config = Config(
@@ -194,6 +203,7 @@ def main(
         target_branch=target_branch,
         use_llm_provider=use_llm_provider,
         use_model=use_model,
+        verbose=verbose,
     )
     if not paths:
         paths = [os.path.abspath(os.getcwd())]

@@ -64,7 +64,6 @@ def find_project_config(path_search_start: Sequence[str]) -> str | None:
     pyproject_toml = project_root / "pyproject.toml"
     if pyproject_toml.is_file():
         return str(pyproject_toml)
-    print()
     return None
 
 

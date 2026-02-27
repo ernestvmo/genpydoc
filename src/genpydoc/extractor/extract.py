@@ -25,7 +25,6 @@ class Extract:
         self.output_formatter = None
         self._add_common_exclude()
         self.skipped_file_count = 0
-        print()
 
     def _add_common_exclude(self) -> None:
         for path in self.paths:
@@ -85,7 +84,8 @@ class Extract:
                     path.endswith(ext) for ext in self.VALID_EXTENSIONS
                 )
                 if not has_valid_extension:
-                    print(f"invalid file {path}")
+                    if self.config.verbose:
+                        print(f"invalid file {path}")
                     return sys.exit(1)
                 filenames.append(path)
                 continue
@@ -96,7 +96,8 @@ class Extract:
 
         if not filenames:
             p = ", ".join(self.paths)
-            print(f"no python files found in {p}")
+            if self.config.verbose:
+                print(f"no python files found in {p}")
             return sys.exit(1)
 
         self.common_base = get_common_base(filenames)
