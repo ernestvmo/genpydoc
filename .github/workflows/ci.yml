@@ -27,6 +27,9 @@ jobs:
         run: |
           git fetch origin ${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}
 
+      - name: echo
+        run: echo "${{ github.base_ref }}"
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -40,7 +43,7 @@ jobs:
           pip install -e .
 
       - name: Run package (may modify files)
-        run: python -m genpydoc --target-branch "${{ github.base_ref }}"
+        run: python -m genpydoc . --target-branch "${{ github.base_ref }}"
 
       # Optional but helpful: fail fast if package left unformatted, etc.
       # - name: Run tests/lint

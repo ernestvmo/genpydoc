@@ -198,5 +198,7 @@ def main(
     if not paths:
         paths = [os.path.abspath(os.getcwd())]
 
+    print(target_branch)
+
     doc = Documenter(config)
     doc.document(paths)
