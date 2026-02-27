@@ -31,7 +31,7 @@ class Config:
     ignore_property_decorators: bool = attr.ib(default=False)
     ignore_overloaded_functions: bool = attr.ib(default=False)
     include_only_covered: bool = attr.ib(default=True)
-    run_on_diff: bool = attr.ib(default=True)
+    run_on_diff: bool = attr.ib(default=False)
     run_staged: bool = attr.ib(default=False)
     target_branch: str | None = attr.ib(default="main")
     use_llm_provider: Literal["openai"] = attr.ib(default="openai")
@@ -39,6 +39,7 @@ class Config:
     post_processing: PostProcessingConfig = attr.ib(
         default=PostProcessingConfig()
     )
+    verbose: bool = attr.ib(default=True)
 
     @run_on_diff.validator
     def _validate_run_on_diff(self, _attribute, _value) -> None:
