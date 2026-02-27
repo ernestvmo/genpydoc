@@ -40,7 +40,9 @@ jobs:
           # Editable install so "python -m your_package" works from the repo checkout
           pip install -e .
 
-      - name: Run package (may modify files)
+      - name: Run genpydoc (may modify files)
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: python -m genpydoc . --target-branch "${{ github.base_ref }}"
 
       # Optional but helpful: fail fast if package left unformatted, etc.
