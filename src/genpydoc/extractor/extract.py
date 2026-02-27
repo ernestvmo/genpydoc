@@ -84,8 +84,7 @@ class Extract:
                     path.endswith(ext) for ext in self.VALID_EXTENSIONS
                 )
                 if not has_valid_extension:
-                    if self.config.verbose:
-                        print(f"invalid file {path}")
+                    print(f"invalid file {path}")
                     return sys.exit(1)
                 filenames.append(path)
                 continue
@@ -96,8 +95,7 @@ class Extract:
 
         if not filenames:
             p = ", ".join(self.paths)
-            if self.config.verbose:
-                print(f"no python files found in {p}")
+            print(f"no python files found in {p}")
             return sys.exit(1)
 
         self.common_base = get_common_base(filenames)

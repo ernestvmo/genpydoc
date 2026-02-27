@@ -39,7 +39,6 @@ class Config:
     post_processing: PostProcessingConfig = attr.ib(
         default=PostProcessingConfig()
     )
-    verbose: bool = attr.ib(default=True)
 
     @run_on_diff.validator
     def _validate_run_on_diff(self, _attribute, _value) -> None:
