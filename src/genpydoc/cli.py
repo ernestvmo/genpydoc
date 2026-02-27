@@ -139,7 +139,7 @@ from genpydoc.utils.utils import read_config_file
     "-v",
     "--verbose",
     is_flag=True,
-    default=True,
+    default=False,
     show_default=True,
     help="Show logs.",
 )
@@ -207,6 +207,8 @@ def main(
     )
     if not paths:
         paths = [os.path.abspath(os.getcwd())]
+
+    print(verbose)
 
     doc = Documenter(config)
     doc.document(paths)
