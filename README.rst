@@ -99,7 +99,7 @@ Command line options
       -s, --ignore-semiprivate        Ignore semiprivate classes, methods, and
                                       functions starting with a single underscore.
       -o, --include-only-covered      Only include Node that have a docstring in
-                                      the processing.  [default: True]
+                                      the processing.  [default: False]
       -D, --run-on-diff               Only run the evaluator on Git diffed Nodes.
       -d, --run-staged                Run on staged diff changes (good for running
                                       locally before a commit).

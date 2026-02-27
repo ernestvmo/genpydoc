@@ -3,9 +3,7 @@ from dataclasses import dataclass
 from enum import StrEnum
 from typing import Optional
 
-from git import Diff, Repo, InvalidGitRepositoryError, NoSuchPathError, Blob
-
-from genpydoc.git_retriever.line_visitor import LineVisitor
+from git import Diff, Repo, InvalidGitRepositoryError, NoSuchPathError
 
 HUNK_REGEX = re.compile(r"^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@")
 
@@ -79,25 +77,16 @@ def parse_diff(diff_text: str | bytes | None) -> list[DiffChange]:
             )
             old_lineno += 1
         else:
-            pass  # no newline at end of file
+            # e.g. "\ No newline at end of file"
+            pass
     return changes
 
 
-def process_changes(
-    changes: list[DiffChange], a_blob: Blob | str, b_blob: Blob | str
-) -> set[str]:
-    if isinstance(a_blob, Blob):
-        a_blob = a_blob.data_stream.read().decode("utf-8")
-
-    if isinstance(b_blob, Blob):
-        b_blob = b_blob.data_stream.read().decode("utf-8")
-
-    lines_removed = set()
-    lines_added = set()
+def process_changes(changes: list[DiffChange]) -> set[int]:
+    lines = set()
     for change in changes:
         if change.kind == DiffChangeType.BLANK:
             continue
-
         if change.text.strip() == "":
             # whitespace or blank line
             continue
@@ -112,33 +101,12 @@ def process_changes(
         )
         if lineno == -1:
             raise
-
-        if change.kind == DiffChangeType.REMOVE:
-            lines_removed.add(lineno)
-        if change.kind == DiffChangeType.ADD:
-            lines_added.add(lineno)
-
-    a_visitor = LineVisitor(a_blob)
-    b_visitor = LineVisitor(b_blob)
-
-    removed = {
-        pull_node_name_from_lineno(line, a_visitor)
-        for line in extract_sequences(lines_removed)
-    }
-    added = {
-        pull_node_name_from_lineno(line, b_visitor)
-        for line in extract_sequences(lines_added)
-    }
-
-    return {n.split(".")[-1] for n in (removed | added) if n}
+        lines.add(lineno)
+    return lines
 
 
-def pull_node_name_from_lineno(lineno: int, visitor: LineVisitor):
-    return visitor.get_scope(lineno)
-
-
-def process_git_diff(diff: Diff) -> set[str]:
-    return process_changes(parse_diff(diff.diff), diff.a_blob, diff.b_blob)
+def process_git_diff(diff: Diff) -> set[int]:
+    return process_changes(parse_diff(diff.diff))
 
 
 def get_change_type(diff: Diff) -> ChangeType:
@@ -177,25 +145,3 @@ def branch_exists(path: str, branch: str):
         return branch in Repo(path).heads
     except InvalidGitRepositoryError:
         return False
-
-
-def extract_sequences(lines: set):
-    pairs = []
-    pair = set()
-
-    for lineno in sorted(lines):
-        if pair == set():
-            pair.add(lineno)
-            last = lineno
-            continue
-
-        if lineno == last + 1:
-            pair.add(lineno)
-        else:
-            pairs.append(pair)
-            pair = {lineno}
-        last = lineno
-    if pair:
-        pairs.append(pair)
-
-    return [min(pair) for pair in pairs]

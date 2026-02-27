@@ -35,6 +35,7 @@ line-length = 79
 
 [tool.ruff]
 line-length = 79
+exclude = ["./tests"]
 
 [tool.genpydoc]
 ignore-magic = false
