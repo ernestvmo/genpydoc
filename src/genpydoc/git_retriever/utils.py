@@ -2,14 +2,12 @@ import re
 from dataclasses import dataclass
 from enum import StrEnum
 from typing import Optional
-
 from git import Diff, Repo, InvalidGitRepositoryError, NoSuchPathError
 
-HUNK_REGEX = re.compile(r"^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@")
+HUNK_REGEX = re.compile("^@@ -(\\d+)(?:,(\\d+))? \\+(\\d+)(?:,(\\d+))? @@")
 
 
 class DiffChangeType(StrEnum):
-    # '+', '-', ' '
     ADD = "+"
     REMOVE = "-"
     BLANK = " "
@@ -26,40 +24,29 @@ class DiffChange:
 class ChangeType(StrEnum):
     ADDED = "A"
     DELETED = "D"
-    # C = "C"
     MODIFIED = "M"
     RENAMED = "R"
     TYPE_PATH = "T"
-    # U = "U"
 
 
 def parse_diff(diff_text: str | bytes | None) -> list[DiffChange]:
     changes = []
-
     old_lineno = None
     new_lineno = None
-
     if isinstance(diff_text, bytes):
         diff_text = diff_text.decode("utf-8")
-
     for line in diff_text.splitlines():
         m = HUNK_REGEX.match(line)
         if m:
             old_lineno = int(m.group(1))
             new_lineno = int(m.group(3))
             continue
-
         if line.startswith("---") or line.startswith("+++"):
-            # skip file headers
             continue
-
         if old_lineno is None or new_lineno is None:
-            # not inside a hunk yet
             continue
-
         prefix = line[0]
         text = line[1:] if len(line) else ""
-
         if prefix == " ":
             changes.append(
                 DiffChange(old_lineno, new_lineno, DiffChangeType.BLANK, text)
@@ -77,7 +64,6 @@ def parse_diff(diff_text: str | bytes | None) -> list[DiffChange]:
             )
             old_lineno += 1
         else:
-            # e.g. "\ No newline at end of file"
             pass
     return changes
 
@@ -88,9 +74,7 @@ def process_changes(changes: list[DiffChange]) -> set[int]:
         if change.kind == DiffChangeType.BLANK:
             continue
         if change.text.strip() == "":
-            # whitespace or blank line
             continue
-
         lineno = next(
             (
                 item
@@ -119,13 +103,13 @@ def get_change_type(diff: Diff) -> ChangeType:
     elif (
         diff.a_path is not None
         and diff.b_path is not None
-        and diff.a_path != diff.b_path
+        and (diff.a_path != diff.b_path)
     ):
         return ChangeType.RENAMED
     elif (
         diff.a_path is not None
         and diff.b_path is not None
-        and diff.a_path == diff.b_path
+        and (diff.a_path == diff.b_path)
     ):
         return ChangeType.MODIFIED
     else:
@@ -133,6 +117,20 @@ def get_change_type(diff: Diff) -> ChangeType:
 
 
 def is_git_repo(path: str):
+    """Return True if the given path is a Git repository; otherwise return False.
+
+    Args:
+        path (str): Path to the repository to check.
+
+    Attributes:
+        path (str): The input path used for the repository check.
+
+    Returns:
+        bool: True if the path points to a valid Git repository, otherwise False.
+
+    Raises:
+        Exception: Propagates exceptions raised by Repo(path) that are not InvalidGitRepositoryError or NoSuchPathError.
+    """
     try:
         _ = Repo(path).git_dir
         return True
@@ -141,6 +139,28 @@ def is_git_repo(path: str):
 
 
 def branch_exists(path: str, branch: str):
+    """Check if a given branch exists in the Git repository located at the specified path.
+
+    This function opens the repository at `path` and determines whether `branch`
+    is present among the repository's heads.
+
+    Args:
+        path: The filesystem path to a Git repository.
+        branch: The name of the branch to check for existence.
+
+    Returns:
+        True if the branch exists in the repository, False otherwise (including when
+        the path is not a valid Git repository).
+
+    Attributes:
+        None
+
+    Raises:
+        InvalidGitRepositoryError: This exception is caught within the function and does
+            not propagate; in this case False is returned.
+        Other exceptions may be raised by the underlying Git library when reading the
+            repository and will propagate to the caller.
+    """
     try:
         return branch in Repo(path).heads
     except InvalidGitRepositoryError:

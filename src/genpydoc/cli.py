@@ -1,5 +1,4 @@
 import os
-
 import click
 from genpydoc.config.config import Config
 from genpydoc.documenter import Documenter
@@ -13,11 +12,7 @@ from genpydoc.utils.utils import read_config_file
     is_flag=True,
     default=False,
     show_default=False,
-    help=(
-        "Ignore all magic methods of classes.  [default: False]\n\nNOTE: This "
-        "does not include the `__init__` method. To ignore `__init__` methods, "
-        "use `--ignore-init-method`."
-    ),
+    help="Ignore all magic methods of classes.  [default: False]\n\nNOTE: This does not include the `__init__` method. To ignore `__init__` methods, use `--ignore-init-method`.",
 )
 @click.option(
     "-C",
@@ -49,12 +44,7 @@ from genpydoc.utils.utils import read_config_file
     is_flag=True,
     default=False,
     show_default=False,
-    help=(
-        "Ignore private classes, methods, and functions starting with two "
-        "underscores.  [default: False]"
-        "\n\nNOTE: This does not include magic methods; use `--ignore-magic` "
-        "and/or `--ignore-init-method` instead."
-    ),
+    help="Ignore private classes, methods, and functions starting with two underscores.  [default: False]\n\nNOTE: This does not include magic methods; use `--ignore-magic` and/or `--ignore-init-method` instead.",
 )
 @click.option(
     "-P",
@@ -78,10 +68,7 @@ from genpydoc.utils.utils import read_config_file
     is_flag=True,
     default=False,
     show_default=True,
-    help=(
-        "Ignore semiprivate classes, methods, and functions starting with a "
-        "single underscore."
-    ),
+    help="Ignore semiprivate classes, methods, and functions starting with a single underscore.",
 )
 @click.option(
     "-o",
@@ -178,6 +165,39 @@ def main(
     style: str,
     config: str | None,
 ):
+    """Run the document generation workflow with the given configuration.
+
+    This function builds a configuration object from the provided flags, defaults the target
+    paths to the current working directory when none are supplied, then instantiates a
+    Documenter and runs the documentation process on the given paths.
+
+    Args:
+        paths (list[str] | None): List of file or directory paths to process. If None, use
+            the current working directory.
+        ignore_magic (bool): If True, ignore Python "magic" attributes and methods (dunder).
+        ignore_private (bool): If True, ignore private members (leading underscore).
+        ignore_semiprivate (bool): If True, ignore semi-private members (single leading underscore).
+        ignore_nested_classes (bool): If True, ignore nested class definitions.
+        ignore_nested_functions (bool): If True, ignore nested function definitions.
+        ignore_setters (bool): If True, ignore property setter methods.
+        ignore_property_decorators (bool): If True, ignore certain property decorators.
+        ignore_overloaded_functions (bool): If True, ignore overloaded function variants.
+        include_only_covered (bool): If True, include only items that are covered (e.g., by tests).
+        run_on_diff (bool): If True, process only changed files (diff-based operation).
+        run_staged (bool): If True, process only staged changes.
+        target_branch (str): The target git branch used for diff/staged determination.
+        use_llm_provider (str): Identifier of the LLM provider to use.
+        use_model (str): Model name or identifier to use with the LLM provider.
+        style (str): The docstring style to apply (e.g., google, numpy, etc.).
+        config (str | None): Path to an optional configuration file. If None, uses in-code defaults.
+
+    Returns:
+        None
+
+    Raises:
+        OSError: If filesystem operations fail.
+        Exception: If underlying components (Config, Documenter) raise an exception.
+    """
     config = Config(
         docstring_style=style,
         ignore_magic=ignore_magic,
@@ -195,9 +215,7 @@ def main(
         use_llm_provider=use_llm_provider,
         use_model=use_model,
     )
-
     if not paths:
         paths = [os.path.abspath(os.getcwd())]
-
     doc = Documenter(config)
     doc.document(paths)
