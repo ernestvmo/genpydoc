@@ -45,6 +45,15 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: python -m genpydoc . -D --target-branch "${{ github.base_ref }}"
 
+      - name: "Debug: show changes after genpydoc"
+        run: |
+          echo "=== git status ==="
+          git status --porcelain
+          echo "=== diff stat ==="
+          git diff --stat || true
+          echo "=== recent files ==="
+          git ls-files -m || true
+
       - name: Create PR with any generated changes
         uses: peter-evans/create-pull-request@v6
         with:
