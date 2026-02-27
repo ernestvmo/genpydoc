@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from enum import StrEnum
 from typing import Optional
 
-from git import Diff
+from git import Diff, Repo, InvalidGitRepositoryError, NoSuchPathError
 
 HUNK_REGEX = re.compile(r"^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@")
 
@@ -130,3 +130,18 @@ def get_change_type(diff: Diff) -> ChangeType:
         return ChangeType.MODIFIED
     else:
         raise ValueError(diff)
+
+
+def is_git_repo(path: str):
+    try:
+        _ = Repo(path).git_dir
+        return True
+    except (InvalidGitRepositoryError, NoSuchPathError):
+        return False
+
+
+def branch_exists(path: str, branch: str):
+    try:
+        return branch in Repo(path).heads
+    except InvalidGitRepositoryError:
+        return False

@@ -1,8 +1,5 @@
-import os
-
-from genpydoc.commenter import Commenter
+from genpydoc.commenter.commenter import Commenter
 from genpydoc.config.config import Config
-from genpydoc.utils.utils import find_project_root
 from genpydoc.extractor.extract import Extract
 from genpydoc.git_retriever.git_retriever import GitRetriever
 
@@ -24,8 +21,9 @@ class Documenter:
 
         if self.config.run_on_diff:
             print("Filtering on git changes...")
-            root = find_project_root((os.path.dirname(__file__),))
-            gitter = GitRetriever(root, covered_nodes, nodes)
+            gitter = GitRetriever(
+                covered_nodes=covered_nodes, nodes=nodes, config=self.config
+            )
             nodes = gitter.extract_diff()
 
         if nodes:
