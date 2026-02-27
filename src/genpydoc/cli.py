@@ -208,7 +208,5 @@ def main(
     if not paths:
         paths = [os.path.abspath(os.getcwd())]
 
-    print(verbose)
-
     doc = Documenter(config)
     doc.document(paths)
