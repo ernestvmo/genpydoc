@@ -1,6 +1,21 @@
 Changelog
 =========
 
+1.0.9
+-----
+
+Added
+^^^^^
+
+- Run genpydoc against a desired branch:
+- ``ci.yml`` pipeline to check and automate documentation of covered nodes touched by a diff on a created PR.
+
+Fix
+^^^
+
+Correctly use ``toml`` configuration.
+
+
 1.0.6
 -----
 
