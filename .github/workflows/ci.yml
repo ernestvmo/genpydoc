@@ -28,9 +28,6 @@ jobs:
           git fetch --no-tags --prune origin "${{ github.base_ref }}"
           git branch --force "${{ github.base_ref }}" "origin/${{ github.base_ref }}"
 
-      - name: echo
-        run: echo "${{ github.base_ref }}"
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
