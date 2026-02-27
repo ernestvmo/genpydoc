@@ -1,4 +1,4 @@
-name: PR - Run package (Poetry) + propose changes
+name: Run genpydoc + PR changes
 
 on:
   pull_request:
@@ -20,7 +20,6 @@ jobs:
       - name: Checkout PR branch
         uses: actions/checkout@v4
         with:
-          # Checkout the PR's head branch (the "current branch" for this PR)
           ref: ${{ github.head_ref }}
           fetch-depth: 0
 
@@ -30,26 +29,14 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
 
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          version: "1.8.3"
-          virtualenvs-create: true
-          virtualenvs-in-project: true
-
-      - name: Cache Poetry virtualenv
-        uses: actions/cache@v4
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-py${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
-          restore-keys: |
-            venv-${{ runner.os }}-py${{ matrix.python-version }}-
-
-      - name: Install dependencies
-        run: poetry install --no-interaction --no-ansi
+      - name: Install project (PEP 621)
+        run: |
+          python -m pip install --upgrade pip
+          # Editable install so "python -m your_package" works from the repo checkout
+          pip install -e .
 
       - name: Run package (may modify files)
-        run: poetry run python -m genpydoc --target-branch main
+        run: python -m genpydoc --target-branch main
 
       # Optional but helpful: fail fast if package left unformatted, etc.
       # - name: Run tests/lint
