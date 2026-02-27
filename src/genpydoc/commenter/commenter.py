@@ -98,7 +98,6 @@ class Commenter:
             desc="Commenting",
             unit="block",
             leave=True,
-            disable=not self.config.verbose,
         ) as pbar:
             for fut in asyncio.as_completed(tasks):
                 try:
@@ -109,10 +108,7 @@ class Commenter:
                     pbar.update(1)
 
         end = timer()
-        if self.config.verbose:
-            print(
-                f"Generated comments concurrently in {end - start:.2f} seconds."
-            )
+        print(f"Generated comments concurrently in {end - start:.2f} seconds.")
         return responses
 
     async def comment(self, nodes: list[CovNode]) -> dict[str, str]:
@@ -129,8 +125,7 @@ class Commenter:
 
     def document(self, nodes: dict[str, list[CovNode]]) -> None:
         for file in nodes:
-            if self.config.verbose:
-                print(f"Checking file: {file}.", end="\t")
+            print(f"Checking file: {file}.", end="\t")
             docs = asyncio.run(self.comment(nodes[file]))
             docs = {k: v for k, v in docs.items() if v != "-1"}
             self.parser.process(Path(file), docs)
