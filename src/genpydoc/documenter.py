@@ -19,15 +19,17 @@ class Documenter:
         else:
             nodes = all_nodes
 
-        if self.config.run_on_diff:
-            print("Filtering on git changes...")
-            gitter = GitRetriever(
-                covered_nodes=covered_nodes, nodes=nodes, config=self.config
-            )
-            nodes = gitter.extract_diff()
+        print(len(nodes))
 
-        if nodes:
-            commenter = Commenter(config=self.config)
-            commenter.document(nodes=nodes)
-        else:
-            print("Nothing to comment.")
+        # if self.config.run_on_diff:
+        #     print("Filtering on git changes...")
+        #     gitter = GitRetriever(
+        #         covered_nodes=covered_nodes, nodes=nodes, config=self.config
+        #     )
+        #     nodes = gitter.extract_diff()
+        #
+        # if nodes:
+        #     commenter = Commenter(config=self.config)
+        #     commenter.document(nodes=nodes)
+        # else:
+        #     print("Nothing to comment.")
