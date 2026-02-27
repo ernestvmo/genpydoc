@@ -1,5 +1,3 @@
-import sys
-
 from genpydoc.commenter.commenter import Commenter
 from genpydoc.config.config import Config
 from genpydoc.extractor.extract import Extract
@@ -28,10 +26,6 @@ class Documenter:
                 covered_nodes=covered_nodes, nodes=nodes, config=self.config
             )
             nodes = gitter.extract_diff()
-
-        for n, v in nodes.items():
-            print(n, len(v))
-        sys.exit()
 
         if self.config.verbose:
             if nodes:
