@@ -1,6 +1,5 @@
 import os.path
 import sys
-
 from git import Diff, Repo
 from genpydoc.config.config import Config
 from genpydoc.extractor.visit import CovNode
@@ -8,6 +7,7 @@ from genpydoc.git_retriever.utils import process_git_diff
 
 
 class GitRetriever:
+
     def __init__(
         self,
         covered_nodes: dict[str, list[CovNode]],
@@ -21,10 +21,8 @@ class GitRetriever:
         self.lines = {}
         self.current_branch = self.repo.active_branch
         self.config = config
-
         self.__add_all()
         self._diffed_map = self.__build_diffed_map()
-
         if not self._diffed_map or all(
             (
                 k not in self.covered_nodes.keys()
@@ -37,6 +35,7 @@ class GitRetriever:
         self.repo.git.add(all=True)
 
     def __build_diffed_map(self) -> dict[str, str]:
+
         def _reverse_mapping(ct: str | None) -> str:
             mapping = {"D": "A", "A": "D"} if self.config.run_staged else {}
             if ct not in mapping:
@@ -108,8 +107,7 @@ class GitRetriever:
         return definitions
 
     def _analyze_covered_nodes(
-        self,
-        diffed_nodes: dict[str, set[CovNode]],
+        self, diffed_nodes: dict[str, set[CovNode]]
     ) -> dict[str, set[CovNode]]:
         keys = list(diffed_nodes.keys())
         for k in keys:
