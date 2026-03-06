@@ -2,8 +2,21 @@ import ast
 
 
 class LineVisitor(ast.NodeVisitor):
-    """
-    AST Node visitor for extracting the source of a specific line number.
+    """LineVisitor is an AST NodeVisitor that computes the dotted path of the innermost
+    scope (class or function) that contains a given line in the source code.
+
+    The visitor traverses the AST, maintains a stack of active scope names, and records
+    the current dotted path whenever the target line falls inside a scope. The final
+    result represents the nearest enclosing scope path for the specified line.
+
+    Attributes:
+        line: int
+            The target line number for which to determine the containing scope path.
+        stack: list[str]
+            The stack of currently active scope names (e.g., class and function names).
+        result: str | None
+            The most recent dotted scope path containing the target line, or None if the
+            line is not inside any tracked scope.
     """
 
     line: int
@@ -22,7 +35,7 @@ class LineVisitor(ast.NodeVisitor):
 
     def visit(self, node) -> None:
         if hasattr(node, "lineno") and hasattr(node, "end_lineno"):
-            if not (node.lineno <= self.line <= node.end_lineno):
+            if not node.lineno <= self.line <= node.end_lineno:
                 return
         super().visit(node)
 
