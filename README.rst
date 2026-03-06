@@ -48,6 +48,7 @@ You can specify the following parameters, either in the ``pyproject.toml`` or th
 .. code-block::
 
     [tool.genpydoc]
+    exclude = ["./tests", "./docs"]
     ignore-magic = false
     ignore-nested-classes = false
     ignore-nested-functions = false
@@ -73,6 +74,9 @@ Command line options
     Usage: python -m genpydoc [OPTIONS] [PATHS]...
 
     Options:
+      -e, --exclude PATH              Exclude PATHs of files and/or directories.
+                                      Multiple `-e/--exclude` invocations
+                                      supported.
       -m, --ignore-magic              Ignore all magic methods of classes.
                                       [default: False]
 

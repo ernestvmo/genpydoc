@@ -19,21 +19,12 @@ class Documenter:
         else:
             nodes = all_nodes
 
-        print("pre")
-        for n, v in nodes.items():
-            print(n, len(v), [v_.name for v_ in v])
-
         if self.config.run_on_diff:
             print("Filtering on git changes...")
             gitter = GitRetriever(
                 covered_nodes=covered_nodes, nodes=nodes, config=self.config
             )
             nodes = gitter.extract_diff()
-
-        print("post")
-        for n, v in nodes.items():
-            print(n, len(v), [v_.name for v_ in v])
-        return
 
         if nodes:
             commenter = Commenter(config=self.config)
