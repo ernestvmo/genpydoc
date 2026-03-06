@@ -8,6 +8,23 @@ from genpydoc.utils.utils import read_config_file
 
 @click.command()
 @click.option(
+    "-e",
+    "--exclude",
+    multiple=True,
+    type=click.Path(
+        file_okay=True,
+        dir_okay=True,
+        writable=False,
+        readable=True,
+        resolve_path=True,
+    ),
+    default=(),
+    help=(
+        "Exclude PATHs of files and/or directories. Multiple `-e/--exclude` "
+        "invocations supported."
+    ),
+)
+@click.option(
     "-m",
     "--ignore-magic",
     is_flag=True,
@@ -161,6 +178,7 @@ from genpydoc.utils.utils import read_config_file
 )
 def main(
     paths: list[str] | None,
+    exclude: list[str],
     ignore_magic: bool,
     ignore_private: bool,
     ignore_semiprivate: bool,
@@ -179,6 +197,7 @@ def main(
     config: str | None,
 ):
     config = Config(
+        exclude=exclude,
         docstring_style=style,
         ignore_magic=ignore_magic,
         ignore_private=ignore_private,

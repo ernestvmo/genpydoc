@@ -19,6 +19,7 @@ class Config:
 
     root: str = find_project_root((os.path.dirname(__file__),))
 
+    exclude: list[str] = attr.ib(default=[])
     docstring_style: str = attr.ib(default="sphinx")
     ignore_magic: bool = attr.ib(default=False)
     ignore_module: bool = attr.ib(default=True)

@@ -38,6 +38,7 @@ line-length = 79
 exclude = ["./tests"]
 
 [tool.genpydoc]
+exclude = ["./tests", "./docs"]
 ignore-magic = false
 ignore-nested-classes = false
 ignore-nested-functions = false

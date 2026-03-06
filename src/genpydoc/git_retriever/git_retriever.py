@@ -1,5 +1,7 @@
 import os.path
 import sys
+from fnmatch import fnmatch
+from typing import Iterator
 
 from git import Diff, Repo
 
@@ -25,6 +27,7 @@ class GitRetriever:
 
         self.__add_all()
         self._diffed_map = self.__build_diffed_map()
+        print(self._diffed_map)
 
         if not self._diffed_map or all(
             (
@@ -37,6 +40,18 @@ class GitRetriever:
     def __add_all(self) -> None:
         self.repo.git.add(all=True)
 
+    def _filter_files(self, files: list[str]) -> Iterator[str]:
+        for file in files:
+            has_valid_ext = any([file.endswith(ext) for ext in set(".py")])
+            if not has_valid_ext:
+                continue
+            basename = os.path.basename(file)
+            if basename == "__init__":  # always ignore __init__ files
+                continue
+            if any(fnmatch(file, exc + "*") for exc in self.config.exclude):
+                continue
+            yield file
+
     def __build_diffed_map(self) -> dict[str, str]:
         def _reverse_mapping(ct: str | None) -> str:
             mapping = {"D": "A", "A": "D"} if self.config.run_staged else {}
@@ -47,13 +62,18 @@ class GitRetriever:
         if self.config.run_staged:
             d = self.repo.index.diff(self.config.target_branch)
         else:
-            d = self.repo.commit(self.current_branch).diff(
-                self.config.target_branch
+            d = self.repo.commit(self.config.target_branch).diff(
+                self.current_branch
             )
+
         return {
             os.path.join(self.root, c.a_path): _reverse_mapping(c.change_type)
             for c in d
             if c.a_path.endswith(".py")
+            and not any(
+                fnmatch(os.path.join(self.root, c.a_path), exc + "*")
+                for exc in self.config.exclude
+            )
         }
 
     @staticmethod
@@ -73,8 +93,8 @@ class GitRetriever:
                     self.config.target_branch, paths=k, create_patch=True
                 )
             else:
-                diff = self.repo.commit(self.current_branch).diff(
-                    self.config.target_branch, paths=k, create_patch=True
+                diff = self.repo.commit(self.config.target_branch).diff(
+                    self.current_branch, paths=k, create_patch=True
                 )
             if len(diff) > 1:
                 raise ValueError
@@ -83,6 +103,7 @@ class GitRetriever:
             if self._diffed_map.get(k, "A") == "A" and k in self.nodes:
                 lines_for_evaluation[k] = self.nodes[k]
             else:
+                print(k, self._diffed_map.get(k))
                 diffed_node_names = self._match_node_name_to_ast_node(
                     k, self._process_diff(diff)
                 )
