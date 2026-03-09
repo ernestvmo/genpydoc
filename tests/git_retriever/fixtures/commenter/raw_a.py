@@ -94,10 +94,7 @@ class Commenter:
         ]
 
         with tqdm(
-            total=len(tasks),
-            desc="Commenting",
-            unit="block",
-            leave=True,
+            total=len(tasks), desc="Commenting", unit="block", leave=True
         ) as pbar:
             for fut in asyncio.as_completed(tasks):
                 try:

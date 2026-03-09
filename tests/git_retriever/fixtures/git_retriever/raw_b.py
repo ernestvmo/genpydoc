@@ -1,10 +1,7 @@
 import os.path
 import sys
-from fnmatch import fnmatch
-from typing import Iterator
 
 from git import Diff, Repo
-
 from genpydoc.config.config import Config
 from genpydoc.extractor.visit import CovNode
 from genpydoc.git_retriever.utils import process_git_diff
@@ -27,7 +24,6 @@ class GitRetriever:
 
         self.__add_all()
         self._diffed_map = self.__build_diffed_map()
-        print(self._diffed_map)
 
         if not self._diffed_map or all(
             (
@@ -40,18 +36,6 @@ class GitRetriever:
     def __add_all(self) -> None:
         self.repo.git.add(all=True)
 
-    def _filter_files(self, files: list[str]) -> Iterator[str]:
-        for file in files:
-            has_valid_ext = any([file.endswith(ext) for ext in set(".py")])
-            if not has_valid_ext:
-                continue
-            basename = os.path.basename(file)
-            if basename == "__init__":  # always ignore __init__ files
-                continue
-            if any(fnmatch(file, exc + "*") for exc in self.config.exclude):
-                continue
-            yield file
-
     def __build_diffed_map(self) -> dict[str, str]:
         def _reverse_mapping(ct: str | None) -> str:
             mapping = {"D": "A", "A": "D"} if self.config.run_staged else {}
@@ -62,18 +46,13 @@ class GitRetriever:
         if self.config.run_staged:
             d = self.repo.index.diff(self.config.target_branch)
         else:
-            d = self.repo.commit(self.config.target_branch).diff(
-                self.current_branch
+            d = self.repo.commit(self.current_branch).diff(
+                self.config.target_branch
             )
-
         return {
             os.path.join(self.root, c.a_path): _reverse_mapping(c.change_type)
             for c in d
             if c.a_path.endswith(".py")
-            and not any(
-                fnmatch(os.path.join(self.root, c.a_path), exc + "*")
-                for exc in self.config.exclude
-            )
         }
 
     @staticmethod
@@ -82,7 +61,7 @@ class GitRetriever:
         sys.exit()
 
     @staticmethod
-    def _process_diff(diff: Diff) -> set[str]:
+    def _process_diff(diff: Diff) -> set[int]:
         return process_git_diff(diff)
 
     def _extract_lines(self) -> dict[str, set[CovNode]]:
@@ -93,8 +72,8 @@ class GitRetriever:
                     self.config.target_branch, paths=k, create_patch=True
                 )
             else:
-                diff = self.repo.commit(self.config.target_branch).diff(
-                    self.current_branch, paths=k, create_patch=True
+                diff = self.repo.commit(self.current_branch).diff(
+                    self.config.target_branch, paths=k, create_patch=True
                 )
             if len(diff) > 1:
                 raise ValueError
@@ -103,25 +82,23 @@ class GitRetriever:
             if self._diffed_map.get(k, "A") == "A" and k in self.nodes:
                 lines_for_evaluation[k] = self.nodes[k]
             else:
-                print(k, self._diffed_map.get(k))
-                diffed_node_names = self._match_node_name_to_ast_node(
-                    k, self._process_diff(diff)
-                )
-                lines_for_evaluation[k] = diffed_node_names
+                lines = self._match_lines_to_ast(k, self._process_diff(diff))
+                lines_for_evaluation[k] = lines
         return lines_for_evaluation
 
-    def _match_node_name_to_ast_node(
-        self, k: str, names: set[str]
-    ) -> set[CovNode]:
+    def _match_lines_to_ast(self, k: str, lines: set[int]) -> set[CovNode]:
         definitions = set()
-        for name in names:
+        for line in lines:
             traversed_nodes: list[CovNode] = []
             if k in self.nodes:
                 for node in self.nodes[k]:
                     if node.level == 0:
                         continue
-
-                    if node.name == name:
+                    if (
+                        node.lineno
+                        <= line
+                        < node.lineno + len(node.code.splitlines())
+                    ):
                         traversed_nodes.append(node)
             if len(traversed_nodes) > 0:
                 for n in traversed_nodes:
@@ -147,5 +124,4 @@ class GitRetriever:
 
     def extract_diff(self) -> dict[str, set[CovNode]]:
         nodes_diffed = self._extract_lines()
-        print(nodes_diffed)
         return self._analyze_covered_nodes(nodes_diffed)

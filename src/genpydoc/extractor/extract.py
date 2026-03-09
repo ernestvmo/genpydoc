@@ -20,7 +20,7 @@ class Extract:
         self.paths = paths
         self.extensions = set(".py")
         self.config = config if config else Config()
-        self.excluded = ()
+        self.excluded = self.config.exclude or ()
         self.common_base = pathlib.Path("/")
         self.output_formatter = None
         self._add_common_exclude()
